@@ -13,7 +13,6 @@ init: false
 startup: services
 boot: auto
 panel_icon: mdi:camera-control
-panel_admin: true
 backup: cold
 options:
   log_level: "INFO"
@@ -30,3 +29,4 @@ schema:
       reconnect_time: float?
       polling_interval: float?
       fast_poll_on_move: bool?
+
