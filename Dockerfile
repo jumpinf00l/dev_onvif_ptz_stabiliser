@@ -4,6 +4,9 @@ FROM ${BUILD_FROM}
 # Set work directory
 WORKDIR /app
 
+# Install Python and pip
+RUN apk add --no-cache python3 py3-pip
+
 # Install dependencies
 COPY requirements.txt .
 RUN \
