@@ -17,8 +17,7 @@ options:
 schema:
   min_log_level: str
   cameras:
-    - name:
-        name: str
+      - name: str
         ip_address: str
         port: int
         username: str
