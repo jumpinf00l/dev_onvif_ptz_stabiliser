@@ -1,5 +1,5 @@
 name: "ONVIF PTZ Stabiliser"
-version: "1.0.12"
+version: "1.0.13"
 slug: "onvif_ptz_stabiliser"
 description: "Monitors and stops PTZ movement after stabilisation for multiple cameras"
 url: "https://github.com/jumpinf00l/dev_onvif_ptz_stabiliser"
@@ -14,11 +14,15 @@ startup: services
 boot: auto
 options:
   min_log_level: "INFO"
-  cameras: [] # Corrected to empty list to match schema
+  cameras:
+    ignore_ssl: false
+    reconnect_time: 5
+    polling_interval: 0.3
+    fast_poll_on_move: false
 schema:
   min_log_level: str
   cameras:
-      - name: str
+      - camera_name: str
         ip_address: str
         port: int
         username: str
@@ -27,4 +31,5 @@ schema:
         reconnect_time: int
         polling_interval: float
         fast_poll_on_move: bool
+
 
