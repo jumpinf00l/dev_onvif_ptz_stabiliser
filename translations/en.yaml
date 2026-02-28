@@ -1,5 +1,8 @@
 ---
 configuration:
+  min_log_level:
+    name: Log level
+    Description: Logging verbosity. DEBUG will consume system resources and should only be used for debugging
   cameras:
       - name: 
           name: Name
