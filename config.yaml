@@ -1,5 +1,5 @@
 name: "ONVIF PTZ Stabiliser"
-version: "1.0.7"
+version: "1.0.8"
 slug: "onvif_ptz_stabiliser"
 description: "Monitors and stops PTZ movement after stabilisation for multiple cameras"
 url: "https://github.com/jumpinf00l/dev_onvif_ptz_stabiliser"
@@ -9,6 +9,7 @@ arch:
   - aarch64
   - amd64
   - i386
+init: false
 startup: services
 boot: auto
 options:
@@ -26,4 +27,3 @@ schema:
         reconnect_time: int
         polling_interval: float
         fast_poll_on_move: bool
-
