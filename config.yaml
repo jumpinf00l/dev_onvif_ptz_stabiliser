@@ -1,0 +1,37 @@
+name: "ONVIF PTZ Stabiliser"
+version: "1.0.0"
+slug: "onvif_ptz_stabiliser"
+description: "Monitors and stops PTZ movement after stabilisation for multiple cameras"
+url: "https://github.com/jumpinf00l/dev_onvif_ptz_stabiliser"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+startup: services
+boot: auto
+options:
+  cameras:
+    - name: "Driveway Tracking"
+      ip_address: "10.0.0.26"
+      port: 80
+      username: "admin"
+      password: "Ki8!8!k8"
+      ignore_ssl: true
+      reconnect_time: 10
+      polling_interval: 0.3
+      fast_poll_on_move: true
+schema:
+  cameras:
+    - name:
+        name: str
+        ip_address: str
+        port: int
+        username: str
+        password: str
+        ignore_ssl: bool
+        reconnect_time: int
+        polling_interval: float
+        fast_poll_on_move: bool
+  min_log_level: str
