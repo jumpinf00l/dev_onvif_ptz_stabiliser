@@ -20,7 +20,7 @@ class ONVIFMonitorApp:
         self.password = camera_config['password']
         self.ignore_ssl = camera_config.get('ignore_ssl', False)
         self.reconnect_time = camera_config.get('reconnect_time', 5)
-        self.name = camera_config.get('name', self.ip)
+        self.camera_name = camera_config.get('camera_name', self.ip)
         self.polling_interval = camera_config.get('polling_interval', 0.3)
         self.fast_poll_on_move = camera_config.get('fast_poll_on_move', True)
         
@@ -40,7 +40,7 @@ class ONVIFMonitorApp:
             return
         severity_char = lvl_upper[0]
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        print(f"{now} - [{severity_char}] - [{self.name}] - {message}")
+        print(f"{now} - [{severity_char}] - [{self.camera_name}] - {message}")
 
     def connect(self):
         while True:
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     else:
         # Fallback to Environment Variables
         camera_list = [{
-            'name': os.getenv('CAMERA_NAME', 'Docker-Camera'),
+            'camera_name': os.getenv('CAMERA_NAME', 'Docker-Camera'),
             'ip_address': os.getenv('IP_ADDRESS', '10.0.0.26'),
             'port': int(os.getenv('PORT', '80')),
             'username': os.getenv('USERNAME', 'admin'),
@@ -167,6 +167,7 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nExiting")
+
 
 
 
