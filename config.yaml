@@ -21,12 +21,13 @@ options:
 schema:
   min_log_level: str
   cameras:
-    - camera_name: str
+    - camera_name: str?
       host: str
       port: port
       username: str
       password: password
-      ignore_ssl: bool
-      reconnect_time: float
-      polling_interval: float
-      fast_poll_on_move: bool
+      ignore_ssl: bool?
+      reconnect_time: float?
+      polling_interval: float?
+      fast_poll_on_move: bool?
+
