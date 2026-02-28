@@ -16,10 +16,9 @@ panel_icon: mdi:camera-control
 panel_admin: true
 backup: cold
 options:
-  min_log_level: "INFO"
-  cameras: []
+  log_level: "INFO"
 schema:
-  min_log_level: str
+  log_level: list(DEBUG|INFO|WARNING|ERROR|CRITICAL)
   cameras:
     - camera_name: str
       host: str
@@ -30,5 +29,3 @@ schema:
       reconnect_time: float?
       polling_interval: float?
       fast_poll_on_move: bool?
-
-
