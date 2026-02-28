@@ -4,13 +4,15 @@ FROM ${BUILD_FROM}
 # Set work directory
 WORKDIR /app
 
-# Install Python and pip
-RUN apk add --no-cache python3 py3-pip
+# Install Python, pip, and dependencies via apk
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    py3-requests \
+    py3-zeep
 
-# Install dependencies
-COPY requirements.txt .
-RUN \
-    pip install --no-cache-dir -r requirements.txt
+# Install onvif-zeep via pip (this should not conflict now)
+RUN pip install --no-cache-dir onvif-zeep
 
 # Copy script
 COPY ptz_monitor.py .
