@@ -4,18 +4,16 @@ FROM ${BUILD_FROM}
 # Set work directory
 WORKDIR /app
 
-# Install Python, pip, and dependencies via apk
-RUN apk add --no-cache \
-    python3 \
-    py3-pip \
-    py3-requests \
-    py3-zeep
+# Install Python and pip via apk
+RUN apk add --no-cache python3 py3-pip
 
-# Install onvif-zeep via pip (this should not conflict now)
-RUN pip install --no-cache-dir onvif-zeep
+# Create a virtual environment and install dependencies inside it
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir zeep onvif-zeep requests
 
 # Copy script
 COPY ptz_monitor.py .
 
-# Run the script
+# Run the script using the python from the virtual environment
 CMD [ "python3", "-u", "ptz_monitor.py" ]
