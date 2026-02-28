@@ -1,7 +1,7 @@
 configuration:
-  min_log_level:
+  log_level:
     name: "Log level"
-    description: "Verbosity to use in logging. INFO is recommended, DEBUG will consume system resources and should only be used for debugging."
+    description: "Verbosity to use in logging. INFO is recommended, DEBUG will consume system resources and should only be used for debugging (Default: INFO)."
   cameras:
     name: "Cameras"
     description: "List of ONVIF cameras to monitor."
@@ -23,13 +23,13 @@ configuration:
         description: "Camera password."
       ignore_ssl:
         name: "Ignore SSL"
-        description: "Ignore SSL certificate validation errors."
+        description: "Ignore SSL certificate validation errors (Default: False)"
       reconnect_time:
         name: "Reconnect Time (seconds)"
-        description: "Seconds to wait before reconnecting."
+        description: "Seconds to wait before reconnecting (Default 5)."
       polling_interval:
         name: "Polling Interval (seconds)"
-        description: "Seconds to wait between polls."
+        description: "Seconds to wait between polls (Default: 0.3)."
       fast_poll_on_move:
         name: "Fast Poll on Movement"
-        description: "Poll quickly during movement to send stop commands immediately."
+        description: "Poll quickly during movement to send stop commands immediately (Default: False)."
