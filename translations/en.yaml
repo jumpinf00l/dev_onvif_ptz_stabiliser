@@ -1,12 +1,12 @@
 configuration:
   min_log_level:
     name: "Log level"
-    description: "Logging verbosity. DEBUG will consume system resources and should only be used for debugging."
+    description: "Verbosity to use in logging. INFO is recommended, DEBUG will consume system resources and should only be used for debugging."
   cameras:
     name: "Cameras"
     description: "List of ONVIF cameras to monitor."
     fields:
-      name:
+      camera_name:
         name: "Camera Name"
         description: "(Optional) Friendly name for logs."
       ip_address:
