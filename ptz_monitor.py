@@ -14,13 +14,13 @@ class ONVIFMonitorApp:
     LEVELS = {'DEBUG': 0, 'INFO': 1, 'WARNING': 2, 'ERROR': 3, 'CRITICAL': 4}
 
     def __init__(self, camera_config: Dict, min_level: str = 'INFO'):
-        self.ip = camera_config['ip_address']
+        self.camera_name = camera_config['camera_name']
+        self.host = camera_config['host']
         self.port = camera_config['port']
         self.user = camera_config['username']
         self.password = camera_config['password']
         self.ignore_ssl = camera_config.get('ignore_ssl', False)
         self.reconnect_time = camera_config.get('reconnect_time', 5)
-        self.camera_name = camera_config.get('camera_name', self.ip)
         self.polling_interval = camera_config.get('polling_interval', 0.3)
         self.fast_poll_on_move = camera_config.get('fast_poll_on_move', True)
         
@@ -45,7 +45,7 @@ class ONVIFMonitorApp:
     def connect(self):
         while True:
             try:
-                self.log(f"Connecting to camera: {self.ip}:{self.port}...", "INFO")
+                self.log(f"Connecting to '{self.camera_name}': {self.host}:{self.port}...", "INFO")
                 transport = None
                 if self.ignore_ssl:
                     session = requests.Session()
@@ -53,7 +53,7 @@ class ONVIFMonitorApp:
                     requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
                     transport = Transport(session=session)
                 
-                self.cam = onvif.ONVIFCamera(self.ip, self.port, self.user, self.password, transport=transport)
+                self.cam = onvif.ONVIFCamera(self.host, self.port, self.user, self.password, transport=transport)
                 self.media_service = self.cam.create_media_service()
                 self.ptz_service = self.cam.create_ptz_service()
                 profiles = self.media_service.GetProfiles()
@@ -65,7 +65,7 @@ class ONVIFMonitorApp:
                 self.prev_pan = status.Position.PanTilt.x
                 self.prev_tilt = status.Position.PanTilt.y
                 self.prev_zoom = status.Position.Zoom.x
-                self.log(f"Connected: {self.ip}:{self.port}", "INFO")
+                self.log(f"Connected to '{self.camera_name}': {self.host}:{self.port}", "INFO")
                 return True
             except Exception as e:
                 self.log(f"Connection failed: {e}", "CRITICAL")
@@ -136,11 +136,11 @@ if __name__ == "__main__":
     else:
         # Fallback to Environment Variables
         camera_list = [{
-            'camera_name': os.getenv('CAMERA_NAME', 'Docker-Camera'),
-            'ip_address': os.getenv('IP_ADDRESS', '10.0.0.26'),
-            'port': int(os.getenv('PORT', '80')),
-            'username': os.getenv('USERNAME', 'admin'),
-            'password': os.getenv('PASSWORD', 'password'),
+            'camera_name': os.getenv('CAMERA_NAME'),
+            'host': os.getenv('host'),
+            'port': int(os.getenv('PORT')),
+            'username': os.getenv('USERNAME'),
+            'password': os.getenv('PASSWORD'),
             'ignore_ssl': os.getenv('IGNORE_SSL', 'False').lower() == 'true',
             'reconnect_time': int(os.getenv('RECONNECT_TIME', '5')),
             'polling_interval': float(os.getenv('POLLING_INTERVAL', '0.3')),
@@ -148,10 +148,9 @@ if __name__ == "__main__":
         }]
         log_level = os.getenv('LOG_LEVEL', 'INFO')
 
-    if not camera_list or (len(camera_list) == 1 and not camera_list[0].get('ip_address') and 'IP_ADDRESS' not in os.environ):
-        print("No cameras configured. Waiting for configuration...")
-        time.sleep(300) # Wait 5 minutes to avoid rapid looping
-        sys.exit(0)
+    if not camera_list or (len(camera_list) == 1 and not camera_list[0].get('host') and 'host' not in os.environ):
+        print("No cameras configured")
+        sys.exit(1)
 
     print(f"Started ONVIF PTZ Stabiliser")
     print(f"Cameras configured: {len(camera_list)}")
@@ -167,6 +166,7 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nExiting")
+
 
 
 
