@@ -150,7 +150,7 @@ if __name__ == "__main__":
         time.sleep(300) # Wait 5 minutes to avoid rapid looping
         sys.exit(0)
 
-    print(f"Starting ONVIF PTZ Stabiliser...")
+    print(f"Started ONVIF PTZ Stabiliser")
     print(f"Cameras configured: {len(camera_list)}")
     threads = []
     for config in camera_list:
@@ -164,4 +164,5 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nExiting")
+
 
