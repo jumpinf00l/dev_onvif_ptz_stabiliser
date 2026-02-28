@@ -9,9 +9,9 @@ configuration:
       camera_name:
         name: "Camera Name"
         description: "(Optional) Friendly name for logs."
-      ip_address:
-        name: "IP Address"
-        description: "The IP address or hostname of the camera."
+      host:
+        name: "Hostname/IP Address"
+        description: "The hostname or IP address of the camera."
       port:
         name: "Port"
         description: "Web interface port (e.g. 80 for HTTP or 443 for HTTPS)."
