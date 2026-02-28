@@ -1,33 +1,35 @@
----
 configuration:
   min_log_level:
-    name: Log level
-    Description: Logging verbosity. DEBUG will consume system resources and should only be used for debugging
+    name: "Log level"
+    description: "Logging verbosity. DEBUG will consume system resources and should only be used for debugging."
   cameras:
-      - name: 
-          name: Name
-          description: (Optional) The name of the camera to show in logs
-        ip_address: 
-          name: IP Address
-          description: The IP address of the camera
-        port: Port
-          name: Port
-          description: The web interface port to use to connect to the camera (usually 80 for HTTP or 443 for HTTPS)
-        username:
-          name: Username
-          description: The username to use to connect to the camera
-        password:
-          name: Password
-          description: The password to use to connect to the camera
-        ignore_ssl:
-          name: Ignore SSL
-          description: (Optional) Whether to ignore SSL validation errors (e.g. untrusted certificates). Default False
-        reconnect_time:
-          name: Reconnect time (seconds)
-          description: (Optional) How long to wait before attempting to reconnect to the camera. Default 5
-        polling_interval:
-          name: Polling interval (seconds)
-          description: (Optional) How long to wait each time after polling the camera. Default 0.3
-        fast_poll_on_move: 
-          Name: Fast poll on movement
-          Description: (Optional) Whether to ignore the polling interval when movement is detected. This ensures that the stop command is sent as soon as possible after the PTZ coordinates stabilise. Default False
+    name: "Cameras"
+    description: "List of ONVIF cameras to monitor."
+    fields:
+      name:
+        name: "Camera Name"
+        description: "(Optional) Friendly name for logs."
+      ip_address:
+        name: "IP Address"
+        description: "The IP address or hostname of the camera."
+      port:
+        name: "Port"
+        description: "Web interface port (e.g., 80 or 443)."
+      username:
+        name: "Username"
+        description: "Camera username."
+      password:
+        name: "Password"
+        description: "Camera password."
+      ignore_ssl:
+        name: "Ignore SSL"
+        description: "Ignore SSL certificate validation errors."
+      reconnect_time:
+        name: "Reconnect Time (seconds)"
+        description: "Seconds to wait before reconnecting."
+      polling_interval:
+        name: "Polling Interval (seconds)"
+        description: "Seconds to wait between polls."
+      fast_poll_on_move:
+        name: "Fast Poll on Movement"
+        description: "Poll quickly during movement to send stop commands immediately."
