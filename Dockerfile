@@ -5,7 +5,6 @@ FROM $BUILD_FROM
 WORKDIR /app
 
 # Copy script and service script
-COPY requirements.txt .
 COPY ptz_monitor.py .
 COPY run.sh /
 RUN chmod a+x /run.sh
@@ -15,3 +14,4 @@ RUN apk add --no-cache python3 py3-pip
 RUN pip install --no-cache-dir --break-system-packages zeep onvif-zeep requests
 
 CMD [ "/run.sh" ]
+
