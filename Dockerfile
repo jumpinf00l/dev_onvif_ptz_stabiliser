@@ -15,5 +15,8 @@ RUN pip install --no-cache-dir zeep onvif-zeep requests
 # Copy script
 COPY ptz_monitor.py .
 
+# Set the entrypoint to the s6 init system
+ENTRYPOINT [ "/init" ]
+
 # Run the script using the python from the virtual environment
 CMD [ "python3", "-u", "ptz_monitor.py" ]
