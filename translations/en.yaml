@@ -14,7 +14,7 @@ configuration:
         description: "The IP address or hostname of the camera."
       port:
         name: "Port"
-        description: "Web interface port (e.g., 80 or 443)."
+        description: "Web interface port (e.g. 80 for HTTP or 443 for HTTPS)."
       username:
         name: "Username"
         description: "Camera username."
