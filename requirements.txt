@@ -1,3 +1,0 @@
-onvif-zeep
-zeep
-requests
