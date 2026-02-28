@@ -52,14 +52,12 @@ class ONVIFMonitorApp:
                     session.verify = False
                     requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
                     transport = Transport(session=session)
-                
                 self.cam = onvif.ONVIFCamera(self.host, self.port, self.user, self.password, transport=transport)
                 self.media_service = self.cam.create_media_service()
                 self.ptz_service = self.cam.create_ptz_service()
                 profiles = self.media_service.GetProfiles()
                 if not profiles:
-                    self.log("No media profiles found", "CRITICAL")
-                    return False
+                    raise Exception("No ONVIF media service profiles found, cannot get PTZ token")
                 self.token = profiles[0].token
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
                 self.prev_pan = status.Position.PanTilt.x
@@ -132,7 +130,7 @@ if __name__ == "__main__":
         with open('/data/options.json') as f:
             config_data = json.load(f)
             camera_list = config_data.get('cameras', [])
-            log_level = config_data.get('min_log_level', 'INFO')
+            log_level = config_data.get('log_level', 'INFO')
     else:
         # Fallback to Environment Variables
         camera_list = [{
@@ -148,7 +146,7 @@ if __name__ == "__main__":
         }]
         log_level = os.getenv('LOG_LEVEL', 'INFO')
 
-    if not camera_list or (len(camera_list) == 1 and not camera_list[0].get('host') and 'host' not in os.environ):
+    if not camera_list:
         print("No cameras configured")
         sys.exit(1)
 
@@ -166,8 +164,3 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nExiting")
-
-
-
-
-
