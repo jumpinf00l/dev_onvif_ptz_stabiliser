@@ -87,23 +87,26 @@ class ONVIFMonitorApp:
                 curr_pan = status.Position.PanTilt.x
                 curr_tilt = status.Position.PanTilt.y
                 curr_zoom = status.Position.Zoom.x
-                is_pt_moving = status.MoveStatus.PanTilt == 'MOVING'
-                is_zoom_moving = status.MoveStatus.Zoom == 'MOVING'
+                curr_pantiltstatus = status.MoveStatus.PanTilt
+                curr_zoomstatus = status.MoveStatus.PanTilt
+                is_pt_moving = curr_pantiltstatus == 'MOVING'
+                is_zoom_moving = curr_zoomstatus == 'MOVING'
                 position_changed = (curr_pan != self.prev_pan or curr_tilt != self.prev_tilt or curr_zoom != self.prev_zoom)
                 currently_moving = position_changed or is_pt_moving or is_zoom_moving
                 
                 self.log(f"Position: P:{curr_pan:.4f} T:{curr_tilt:.4f} Z:{curr_zoom:.4f}", "DEBUG")
-                self.log(f"Currently moving: {currently_moving}", "DEBUG")
+                self.log(f"Pan/Tilt Status: {curr_pantiltstatus}, Zoom Status: {curr_zoomstatus}", "DEBUG")
+                self.log(f"PTZ position changing: {currently_moving}", "DEBUG")
 
                 if currently_moving:
                     if not self.is_currently_moving:
-                        self.log("Movement Detected...", "INFO")
+                        self.log("Movement detected, waiting for coordinates to stabilise...", "INFO")
                         self.is_currently_moving = True
                     if not self.fast_poll_on_move:
                         time.sleep(self.polling_interval)
                 else:
                     if self.is_currently_moving:
-                        self.log("Position stabilised Triggering Stop...", "INFO")
+                        self.log("Coordinates stabilised, triggering stop...", "INFO")
                         self.send_stop_command()
                         self.is_currently_moving = False
                     time.sleep(self.polling_interval)
@@ -113,9 +116,9 @@ class ONVIFMonitorApp:
                 self.prev_zoom = curr_zoom
             except Exception as e:
                 self.log(f"Polling failed: {e}", "CRITICAL")
-                self.log("Reconnecting...", "INFO")
+                self.log("Reconnecting to camera...", "INFO")
                 if self.connect():
-                    self.log("Resuming...", "INFO")
+                    self.log("Resuming polling camera...", "INFO")
                 else:
                     time.sleep(self.reconnect_time)
 
@@ -164,5 +167,6 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nExiting")
+
 
 
