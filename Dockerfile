@@ -4,10 +4,8 @@ FROM ${BUILD_FROM}
 # Set work directory
 WORKDIR /app
 
-# Install Python and pip via apk
+# Install Python, pip, and dependencies
 RUN apk add --no-cache python3 py3-pip
-
-# Install dependencies using --break-system-packages
 RUN pip install --no-cache-dir --break-system-packages zeep onvif-zeep requests
 
 # Copy script and service script
@@ -17,4 +15,5 @@ COPY run.sh /etc/services.d/ptz_monitor/run
 # Ensure the service script is executable
 RUN chmod +x /etc/services.d/ptz_monitor/run
 
-# The base image already sets ENTRYPOINT ["/init"]
+# Ensure the entrypoint is correct for s6
+ENTRYPOINT ["/init"]
