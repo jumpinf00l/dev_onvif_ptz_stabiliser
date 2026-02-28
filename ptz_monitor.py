@@ -125,26 +125,30 @@ def start_camera_thread(config, log_level):
         app.run()
 
 if __name__ == "__main__":
-    # 1. Try to load config from Home Assistant Add-on file
     if os.path.exists('/data/options.json'):
         with open('/data/options.json') as f:
             config_data = json.load(f)
             camera_list = config_data.get('cameras', [])
             log_level = config_data.get('min_log_level', 'INFO')
     else:
-        # 2. Fallback to Environment Variables for raw Docker
+        # Fallback to Environment Variables
         camera_list = [{
-            'NAME': os.getenv('CAMERA_NAME', 'Docker-Camera'),
-            'IP_ADDRESS': os.getenv('IP_ADDRESS', '10.0.0.26'),
-            'PORT': int(os.getenv('PORT', '80')),
-            'USERNAME': os.getenv('USERNAME', 'admin'),
-            'PASSWORD': os.getenv('PASSWORD', 'password'),
-            'IGNORE_SSL': os.getenv('IGNORE_SSL', 'False').lower() == 'true',
-            'RECONNECT_TIME': int(os.getenv('RECONNECT_TIME', '5')),
-            'POLLING_INTERVAL': float(os.getenv('POLLING_INTERVAL', '0.3')),
-            'FAST_POLL_ON_MOVE': os.getenv('FAST_POLL_ON_MOVE', 'True').lower() == 'true'
+            'name': os.getenv('CAMERA_NAME', 'Docker-Camera'),
+            'ip_address': os.getenv('IP_ADDRESS', '10.0.0.26'),
+            'port': int(os.getenv('PORT', '80')),
+            'username': os.getenv('USERNAME', 'admin'),
+            'password': os.getenv('PASSWORD', 'password'),
+            'ignore_ssl': os.getenv('IGNORE_SSL', 'False').lower() == 'true',
+            'reconnect_time': int(os.getenv('RECONNECT_TIME', '5')),
+            'polling_interval': float(os.getenv('POLLING_INTERVAL', '0.3')),
+            'fast_poll_on_move': os.getenv('FAST_POLL_ON_MOVE', 'True').lower() == 'true'
         }]
         log_level = os.getenv('LOG_LEVEL', 'INFO')
+
+    if not camera_list or (len(camera_list) == 1 and not camera_list[0].get('ip_address') and 'IP_ADDRESS' not in os.environ):
+        print("No cameras configured. Waiting for configuration...")
+        time.sleep(300) # Wait 5 minutes to avoid rapid looping
+        sys.exit(0)
 
     print(f"Starting script for {len(camera_list)} cameras")
     threads = []
