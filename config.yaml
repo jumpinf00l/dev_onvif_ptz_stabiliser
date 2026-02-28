@@ -14,7 +14,11 @@ startup: services
 boot: auto
 options:
   min_log_level: "INFO"
-  cameras: []
+  cameras:
+    ignore_ssl: false
+    reconnect_time: 5
+    polling_interval: 0.3
+    fast_poll_on_move: false
 schema:
   min_log_level: str
   cameras:
@@ -27,4 +31,3 @@ schema:
         reconnect_time: int
         polling_interval: float
         fast_poll_on_move: bool
-
