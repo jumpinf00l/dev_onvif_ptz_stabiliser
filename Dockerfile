@@ -7,16 +7,14 @@ WORKDIR /app
 # Install Python and pip via apk
 RUN apk add --no-cache python3 py3-pip
 
-# Create a virtual environment and install dependencies inside it
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir zeep onvif-zeep requests
+# Install dependencies using --break-system-packages
+RUN pip install --no-cache-dir --break-system-packages zeep onvif-zeep requests
 
-# Copy script
+# Copy script and service script
 COPY ptz_monitor.py .
+COPY run.sh /etc/services.d/ptz_monitor/run
 
-# Set the entrypoint to the s6 init system
-ENTRYPOINT [ "/init" ]
+# Ensure the service script is executable
+RUN chmod +x /etc/services.d/ptz_monitor/run
 
-# Run the script using the python from the virtual environment
-CMD [ "python3", "-u", "ptz_monitor.py" ]
+# The base image already sets ENTRYPOINT ["/init"]
