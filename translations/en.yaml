@@ -6,30 +6,30 @@ configuration:
     name: "Cameras"
     description: "List of ONVIF cameras to monitor."
     fields:
-      camera_name:
-        name: "Camera Name"
-        description: "Friendly camera name for configuration and logging."
-      host:
-        name: "Hostname/IP Address"
-        description: "The hostname or IP address of the camera."
-      port:
-        name: "Port"
-        description: "Web interface port (e.g. 80 for HTTP or 443 for HTTPS)."
-      username:
-        name: "Username"
-        description: "Camera username."
-      password:
-        name: "Password"
-        description: "Camera password."
-      ignore_ssl:
-        name: "Ignore SSL"
-        description: "Ignore SSL certificate validation errors (Default: False)"
-      reconnect_time:
-        name: "Reconnect Time (seconds)"
-        description: "Seconds to wait before reconnecting (Default 5)."
-      polling_interval:
-        name: "Polling Interval (seconds)"
-        description: "Seconds to wait between polls (Default: 0.3)."
-      fast_poll_on_move:
-        name: "Fast Poll on Movement"
-        description: "Poll quickly during movement to send stop commands immediately (Default: False)."
+      - camera_name:
+          name: "Camera Name"
+          description: "Friendly camera name for configuration and logging."
+        host:
+          name: "Hostname/IP Address"
+          description: "The hostname or IP address of the camera."
+        port:
+          name: "Port"
+          description: "Web interface port (e.g. 80 for HTTP or 443 for HTTPS)."
+        username:
+          name: "Username"
+          description: "Camera username."
+        password:
+          name: "Password"
+          description: "Camera password."
+        ignore_ssl:
+          name: "Ignore SSL"
+          description: "Ignore SSL certificate validation errors (Default: False)"
+        reconnect_time:
+          name: "Reconnect Time (seconds)"
+          description: "Seconds to wait before reconnecting (Default 5)."
+        polling_interval:
+          name: "Polling Interval (seconds)"
+          description: "Seconds to wait between polls (Default: 0.3)."
+        fast_poll_on_move:
+          name: "Fast Poll on Movement"
+          description: "Poll quickly during movement to send stop commands immediately (Default: False)."
