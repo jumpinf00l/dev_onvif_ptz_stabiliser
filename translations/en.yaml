@@ -26,7 +26,7 @@ configuration:
         description: "Ignore SSL certificate validation errors (Default: False)"
       reconnect_time:
         name: "Reconnect Time (seconds)"
-        description: "Seconds to wait before reconnecting (Default 5)."
+        description: "Seconds to wait before reconnecting (Default: 5)."
       polling_interval:
         name: "Polling Interval (seconds)"
         description: "Seconds to wait between polls (Default: 0.3)."
