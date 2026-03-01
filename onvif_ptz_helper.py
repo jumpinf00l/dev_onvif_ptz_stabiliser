@@ -118,7 +118,7 @@ class ONVIFMonitorApp:
                 self.log(f"Polling failed: {e}", "CRITICAL")
                 self.log("Reconnecting to camera...", "INFO")
                 if self.connect():
-                    self.log("Resuming polling camera...", "INFO")
+                    self.log("Reconnected to camera, resuming polling...", "INFO")
                 else:
                     time.sleep(self.reconnect_time)
 
@@ -149,11 +149,11 @@ if __name__ == "__main__":
         log_level = os.getenv('LOG_LEVEL', 'INFO')
 
     if not camera_list:
-        print("No cameras configured")
+        self.log("No cameras configured, check configuration","CRITICAL")
         sys.exit(1)
 
-    print(f"Started ONVIF PTZ Helper")
-    print(f"Cameras configured: {len(camera_list)}")
+    self.log(f"Started ONVIF PTZ Helper", "INFO")
+    self.log(f"Cameras configured: {len(camera_list)}", "INFO")
     threads = []
     for config in camera_list:
         t = threading.Thread(target=start_camera_thread, args=(config, log_level))
@@ -165,5 +165,6 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\nExiting")
+        self.log(f"Exiting...", "INFO")
+
 
