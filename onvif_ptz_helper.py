@@ -128,6 +128,15 @@ def start_camera_thread(config, log_level):
         app.run()
 
 if __name__ == "__main__":
+
+    def log(self, message: str, level: str = 'INFO'):
+        lvl_upper = level.upper()
+        if self.LEVELS.get(lvl_upper, 1) < self.min_level_value:
+            return
+        severity_char = lvl_upper[0]
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        print(f"{now} - [{severity_char}] - [{self.camera_name}] - {message}")
+    
     if os.path.exists('/data/options.json'):
         with open('/data/options.json') as f:
             config_data = json.load(f)
@@ -152,8 +161,8 @@ if __name__ == "__main__":
         self.log("No cameras configured, check configuration","CRITICAL")
         sys.exit(1)
 
-    print(f"Started ONVIF PTZ Helper")
-    print(f"Cameras configured: {len(camera_list)}")
+    self.log(f"Started ONVIF PTZ Helper", "INFO")
+    self.log(f"Cameras configured: {len(camera_list)}", "INFO")
     threads = []
     for config in camera_list:
         t = threading.Thread(target=start_camera_thread, args=(config, log_level))
@@ -165,7 +174,8 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print(f"\nExiting...")
+        self.log("Exiting...", "INFO")
+
 
 
 
