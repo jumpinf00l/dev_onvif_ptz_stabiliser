@@ -72,7 +72,7 @@ class ONVIFMonitorApp:
 
     def send_stop_command(self):
         try:
-            self.log("Sending stop command", "INFO")
+            self.log("Sending stop command...", "INFO")
             self.ptz_service.Stop({'ProfileToken': self.token, 'PanTilt': True, 'Zoom': True})
             self.log("Stop command sent", "INFO")
         except Exception as e:
@@ -170,4 +170,5 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        systemlog("Exiting...", "INFO")
+        systemlog("Exiting...", "WARNING")
+
