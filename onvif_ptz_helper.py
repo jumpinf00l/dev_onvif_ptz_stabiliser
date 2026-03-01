@@ -88,10 +88,7 @@ class ONVIFMonitorApp:
                 curr_zoom = status.Position.Zoom.x
                 curr_pantiltstatus = status.MoveStatus.PanTilt
                 curr_zoomstatus = status.MoveStatus.PanTilt
-                is_pt_moving = curr_pantiltstatus == 'MOVING'
-                is_zoom_moving = curr_zoomstatus == 'MOVING'
-                position_changed = (curr_pan != self.prev_pan or curr_tilt != self.prev_tilt or curr_zoom != self.prev_zoom)
-                currently_moving = position_changed or is_pt_moving or is_zoom_moving
+                currently_moving = (curr_pan != self.prev_pan or curr_tilt != self.prev_tilt or curr_zoom != self.prev_zoom)
                 
                 self.log(f"PTZ position: P:{curr_pan:.4f} T:{curr_tilt:.4f} Z:{curr_zoom:.4f}", "DEBUG")
                 self.log(f"PTZ position changing: {currently_moving}", "DEBUG")
@@ -105,7 +102,7 @@ class ONVIFMonitorApp:
                         time.sleep(self.polling_interval)
                 else:
                     if self.is_currently_moving:
-                        self.log("PTZ position stabilised while PTZ status still 'MOVING'", "INFO")
+                        self.log("PTZ position stabilised", "INFO")
                         self.send_stop_command()
                         self.is_currently_moving = False
                         self.log("Monitoring PTZ position...", "INFO")
@@ -171,4 +168,5 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         systemlog("Exiting...", "WARNING")
+
 
