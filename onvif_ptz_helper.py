@@ -158,11 +158,11 @@ if __name__ == "__main__":
         log_level = os.getenv('LOG_LEVEL', 'INFO')
 
     if not camera_list:
-        self.log("No cameras configured, check configuration","CRITICAL")
+        log("No cameras configured, check configuration","CRITICAL")
         sys.exit(1)
 
-    self.log(f"Started ONVIF PTZ Helper", "INFO")
-    self.log(f"Cameras configured: {len(camera_list)}", "INFO")
+    log(f"Started ONVIF PTZ Helper", "INFO")
+    log(f"Cameras configured: {len(camera_list)}", "INFO")
     threads = []
     for config in camera_list:
         t = threading.Thread(target=start_camera_thread, args=(config, log_level))
@@ -174,7 +174,8 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        self.log("Exiting...", "INFO")
+        log("Exiting...", "INFO")
+
 
 
 
