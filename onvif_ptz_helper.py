@@ -128,9 +128,10 @@ def start_camera_thread(config, log_level):
         app.run()
 
 if __name__ == "__main__":
-    def systemlog(message: str):
+    def systemlog(message: str, level: str = 'INFO'):
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        print(f"{now} - [C] - [SYSTEM] - {message}")
+        severity_char = level[0]
+        print(f"{now} - [{severity_char}] - [SYSTEM] - {message}")
     
     if os.path.exists('/data/options.json'):
         with open('/data/options.json') as f:
@@ -170,10 +171,3 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         systemlog("Exiting...", "INFO")
-
-
-
-
-
-
-
