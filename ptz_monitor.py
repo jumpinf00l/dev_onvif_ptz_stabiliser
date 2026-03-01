@@ -72,13 +72,14 @@ class ONVIFMonitorApp:
 
     def send_stop_command(self):
         try:
+            self.log("Sending stop command", "INFO")
             self.ptz_service.Stop({'ProfileToken': self.token, 'PanTilt': True, 'Zoom': True})
             self.log("Stop command sent", "INFO")
         except Exception as e:
             self.log(f"Stop command failed: {e}", "ERROR")
 
     def run(self):
-        self.log("Monitoring PTZ movements...", "INFO")
+        self.log("Monitoring PTZ position...", "INFO")
         while True:
             try:
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
@@ -92,21 +93,22 @@ class ONVIFMonitorApp:
                 position_changed = (curr_pan != self.prev_pan or curr_tilt != self.prev_tilt or curr_zoom != self.prev_zoom)
                 currently_moving = position_changed or is_pt_moving or is_zoom_moving
                 
-                self.log(f"Position: P:{curr_pan:.4f} T:{curr_tilt:.4f} Z:{curr_zoom:.4f}", "DEBUG")
-                self.log(f"Pan/Tilt Status: {curr_pantiltstatus}, Zoom Status: {curr_zoomstatus}", "DEBUG")
+                self.log(f"PTZ position: P:{curr_pan:.4f} T:{curr_tilt:.4f} Z:{curr_zoom:.4f}", "DEBUG")
                 self.log(f"PTZ position changing: {currently_moving}", "DEBUG")
+                self.log(f"PTZ status: PanTilt: {curr_pantiltstatus}, Zoom: {curr_zoomstatus}", "DEBUG")
 
                 if currently_moving:
                     if not self.is_currently_moving:
-                        self.log("Movement detected, waiting for coordinates to stabilise...", "INFO")
+                        self.log("Movement detected, waiting for PTZ position to stabilise...", "INFO")
                         self.is_currently_moving = True
                     if not self.fast_poll_on_move:
                         time.sleep(self.polling_interval)
                 else:
                     if self.is_currently_moving:
-                        self.log("Coordinates stabilised, triggering stop...", "INFO")
+                        self.log("PTZ position stabilised while PTZ status still 'MOVING'", "INFO")
                         self.send_stop_command()
                         self.is_currently_moving = False
+                        self.log("Monitoring PTZ position...", "INFO")
                     time.sleep(self.polling_interval)
                 
                 self.prev_pan = curr_pan
@@ -150,7 +152,7 @@ if __name__ == "__main__":
         print("No cameras configured")
         sys.exit(1)
 
-    print(f"Started ONVIF PTZ Stabiliser")
+    print(f"Started ONVIF PTZ Helper")
     print(f"Cameras configured: {len(camera_list)}")
     threads = []
     for config in camera_list:
@@ -164,3 +166,4 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nExiting")
+
