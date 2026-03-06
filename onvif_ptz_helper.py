@@ -89,7 +89,7 @@ class ONVIFMonitorApp:
                 
                 log(f"PTZ position: P:{curr_coords[0]} T:{curr_coords[1]} Z:{curr_coords[2]}", self.camera_name, "DEBUG")
                 log(f"PTZ position changing: {currently_moving}", self.camera_name, "DEBUG")
-                log(f"PTZ status: PanTilt: {curr_pantiltstatus}, Zoom: {curr_zoomstatus}", self.camera_name, "DEBUG")
+                log(f"PTZ reported status: PanTilt: {curr_pantiltstatus}, Zoom: {curr_zoomstatus}", self.camera_name, "DEBUG")
 
                 if currently_moving:
                     if not self.is_currently_moving:
@@ -135,7 +135,7 @@ def validate_and_start_cameras(camera_list, log_level):
             val = config.get(key)
 
             if val is None:
-                log(f"'{key}' defaulted to {default}", camera_name, "DEBUG")
+                log(f"Defaulted '{key}' to {default}", camera_name, "DEBUG")
                 config[key] = default
 
             elif val < min_allowed:
@@ -186,6 +186,7 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         log(f"Keyboard interrupt, exiting...", "System", "WARNING")
+
 
 
 
