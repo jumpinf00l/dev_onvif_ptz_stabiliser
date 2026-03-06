@@ -119,10 +119,10 @@ class ONVIFMonitorApp:
                 else:
                     time.sleep(self.reconnect_time)
 
-    def systemlog(message: str, level: str = 'INFO'):
-        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        severity_char = level[0]
-        print(f"{now} - [{severity_char}] - [SYSTEM] - {message}")
+def systemlog(message: str, level: str = 'INFO'):
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+    severity_char = level[0]
+    print(f"{now} - [{severity_char}] - [SYSTEM] - {message}")
 
 def validate_and_start_cameras(camera_list, log_level):
     MIN_VALS = {
@@ -177,8 +177,7 @@ if __name__ == "__main__":
         systemlog("Configuration error: no cameras configured, check configuration", "CRITICAL")
         sys.exit(1)
     
-    systemlog(f"Started ONVIF PTZ Helper", "INFO")
-    systemlog(f"Cameras configured: {len(camera_list)}", "INFO")
+    systemlog(f"Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "INFO")
     validate_and_start_cameras(camera_list, log_level)
         
     try:
@@ -186,7 +185,3 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         systemlog("Exiting...", "WARNING")
-
-
-
-
