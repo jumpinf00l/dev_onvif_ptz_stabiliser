@@ -36,8 +36,3 @@ configuration:
       active_polling_threshold:
         name: "Active Polling Threshold"
         description: "The number of active polls with identical PTZ coordinates to determine that PTZ movement has stopped (Default: 2, Minimum: 2)."
-
-
-      fast_poll_on_move:
-        name: "Fast Poll on Movement"
-        description: "Poll quickly during movement to send stop commands immediately (Default: False)."
