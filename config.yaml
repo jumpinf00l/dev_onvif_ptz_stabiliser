@@ -26,10 +26,11 @@ schema:
       username: str
       password: password
       ignore_ssl: bool?
-      reconnect_time: float?
-      idle_polling_interval: float?
-      active_polling_interval: float?
-      active_polling_threshold: int?
+      reconnect_time: float(0,)?
+      idle_polling_interval: float(0,)?
+      active_polling_interval: float(0,)?
+      active_polling_threshold: int(2,)?
 
 
       fast_poll_on_move: bool?
+
