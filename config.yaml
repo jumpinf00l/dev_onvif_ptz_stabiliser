@@ -27,6 +27,9 @@ schema:
       password: password
       ignore_ssl: bool?
       reconnect_time: float?
-      polling_interval: float?
-      fast_poll_on_move: bool?
+      idle_polling_interval: float?
+      active_polling_interval: float?
+      active_polling_threshold: int?
 
+
+      fast_poll_on_move: bool?
