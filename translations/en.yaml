@@ -27,9 +27,17 @@ configuration:
       reconnect_time:
         name: "Reconnect Time (seconds)"
         description: "Seconds to wait before reconnecting (Default: 5)."
-      polling_interval:
-        name: "Polling Interval (seconds)"
-        description: "Seconds to wait between polls (Default: 0.3)."
+      idle_polling_interval:
+        name: "Idle Polling Interval (seconds)"
+        description: "Seconds to wait between polls while PTZ movement is idle (Default: 0.3)."
+      active_polling_interval:
+        name: "Active Polling Interval (seconds)"
+        description: "Seconds to wait between polls while PTZ movement is active (Default: 0.3)."
+      active_polling_threshold:
+        name: "Active Polling Threshold"
+        description: "The number of active polls with identical PTZ coordinates to determine that PTZ movement has stopped (Default: 2)."
+
+
       fast_poll_on_move:
         name: "Fast Poll on Movement"
         description: "Poll quickly during movement to send stop commands immediately (Default: False)."
