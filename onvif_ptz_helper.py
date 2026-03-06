@@ -133,7 +133,7 @@ def validate_and_start_cameras(camera_list, log_level):
     }
     
     for config in camera_list:
-        camera_name = config.get(camera_name, 'Unknown')
+        camera_name = config.get('camera_name', 'Unknown')
         
         for key, (min_allowed, default) in minimum_camera_values.items():
             val = config.get(key)
@@ -194,5 +194,6 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         systemlog("Exiting...", "System", "WARNING")
+
 
 
