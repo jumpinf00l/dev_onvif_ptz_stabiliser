@@ -65,14 +65,14 @@ class ONVIFMonitorApp:
 
     def send_stop_command(self):
         try:
-            log("Sending stop command...", self.camera_name, "INFO")
+            log(f"Sending stop command...", self.camera_name, "INFO")
             self.ptz_service.Stop({'ProfileToken': self.token, 'PanTilt': True, 'Zoom': True})
-            log("Stop command sent", self.camera_name, "INFO")
+            log(f"Stop command sent", self.camera_name, "INFO")
         except Exception as e:
             log(f"Stop command failed: {e}", self.camera_name, "ERROR")
 
     def run(self):
-        log("Monitoring PTZ position...", self.camera_name, "INFO")
+        log(f"Monitoring PTZ position...", self.camera_name, "INFO")
         while True:
             try:
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
@@ -91,23 +91,23 @@ class ONVIFMonitorApp:
 
                 if currently_moving:
                     if not self.is_currently_moving:
-                        log("Movement detected, waiting for PTZ position to stabilise...", self.camera_name, "INFO")
+                        log(f"Movement detected, waiting for PTZ position to stabilise...", self.camera_name, "INFO")
                         self.is_currently_moving = True
                     time.sleep(self.active_polling_interval)
                 else:
                     if self.is_currently_moving:
-                        log("PTZ position stabilised", self.camera_name, "INFO")
+                        log(f"PTZ position stabilised", self.camera_name, "INFO")
                         self.send_stop_command()
                         self.is_currently_moving = False
-                        log("Monitoring PTZ position...", self.camera_name, "INFO")
+                        log(f"Monitoring PTZ position...", self.camera_name, "INFO")
                     time.sleep(self.idle_polling_interval)
                 
                 self.history.append(curr_coords)
             except Exception as e:
                 log(f"Polling failed: {e}", self.camera_name, "CRITICAL")
-                log("Reconnecting to camera...", self.camera_name, "INFO")
+                log(f"Reconnecting to camera...", self.camera_name, "INFO")
                 if self.connect():
-                    log("Reconnected to camera, resuming polling...", self.camera_name, "INFO")
+                    log(f"Reconnected to camera, resuming polling...", self.camera_name, "INFO")
                 else:
                     time.sleep(self.reconnect_time)
 
@@ -131,11 +131,11 @@ def validate_and_start_cameras(camera_list, log_level):
             val = config.get(key)
 
             if val is None:
-                log("'{key}' defaulted to {default}", camera_name, "DEBUG")
+                log(f"'{key}' defaulted to {default}", camera_name, "DEBUG")
                 config[key] = default
 
             elif val < min_allowed:
-                log("'{key}: {val}' is invalid. Defaulting to {default}. Check your configuration", camera_name, "WARNING")
+                log(f"'{key}: {val}' is invalid. Defaulting to {default}. Check your configuration", camera_name, "WARNING")
                 config[key] = default
         
         t = threading.Thread(target=start_camera_thread, args=(config, log_level))
@@ -171,17 +171,18 @@ if __name__ == "__main__":
         }]
 
     if not camera_list:
-        log("Configuration error: no cameras configured, check configuration", "System", "CRITICAL")
+        log(f"Configuration error: no cameras configured, check configuration", "System", "CRITICAL")
         sys.exit(1)
     
-    log("Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "System", "INFO")
+    log(f"Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "System", "INFO")
     validate_and_start_cameras(camera_list, log_level)
         
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        log("Keyboard interrupt, exiting...", "System", "WARNING")
+        log(f"Keyboard interrupt, exiting...", "System", "WARNING")
+
 
 
 
