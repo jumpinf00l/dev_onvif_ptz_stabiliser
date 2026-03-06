@@ -1,7 +1,7 @@
 name: "ONVIF PTZ Helper"
-version: "2026.3.13"
+version: "2026.3.14"
 slug: "onvif_ptz_helper"
-description: "Helps some ONVIF cameras (e.g. Hikvision) which do not reliably update PTZ status to allow external services like Frigate Autotracking to work"
+description: "Helps some ONVIF cameras that don't update their PTZ movement to idle"
 url: "https://github.com/jumpinf00l/dev_onvif_ptz_stabiliser"
 arch:
   - armhf
@@ -12,7 +12,6 @@ arch:
 init: false
 startup: services
 boot: auto
-panel_icon: mdi:camera-control
 backup: cold
 options:
   log_level: "INFO"
@@ -30,7 +29,3 @@ schema:
       idle_polling_interval: float(0,)?
       active_polling_interval: float(0,)?
       active_polling_history: int(2,)?
-
-
-
-
