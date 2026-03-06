@@ -33,6 +33,6 @@ configuration:
       active_polling_interval:
         name: "Active Polling Interval (seconds)"
         description: "Seconds to wait between polls while PTZ movement is active (Default: 0.3, Minimum: 0)."
-      active_polling_threshold:
-        name: "Active Polling Threshold"
-        description: "The number of active polls with identical PTZ coordinates to determine that PTZ movement has stopped (Default: 2, Minimum: 2)."
+      active_polling_history:
+        name: "Active Polling History"
+        description: "The number of active polls with identical PTZ coordinates to determine that PTZ movement has stopped, includes the current poll (Default: 2, Minimum: 2)."
