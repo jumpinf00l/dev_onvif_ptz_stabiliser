@@ -8,19 +8,19 @@ configuration:
     fields:
       camera_name:
         name: "Camera Name"
-        description: "Friendly camera name for configuration and logging."
+        description: " A friendly camera name for configuration and logging."
       host:
         name: "Hostname/IP Address"
         description: "The hostname or IP address of the camera."
       port:
         name: "Port"
-        description: "Web interface port (e.g. 80 for HTTP or 443 for HTTPS)."
+        description: "The ONVIF interface port number of the camera."
       username:
         name: "Username"
-        description: "Camera username."
+        description: "The username to log into the ONVIF interface of the camera."
       password:
         name: "Password"
-        description: "Camera password."
+        description: "The password to log into the ONVIF interface of the camera."
       ignore_ssl:
         name: "Ignore SSL"
         description: "Ignore SSL certificate validation errors (Default: False)"
