@@ -137,17 +137,13 @@ def validate_and_start_cameras(camera_list, log_level):
         
         for key, (min_allowed, default) in minimum_camera_values.items():
             val = config.get(key)
-            
-            # Case 1: Value is not set (None)
+
             if val is None:
-                systemlog(f"'{key}' defaulted to {default}", camera_name, "DEBUG")
+                systemlog("'{key}' defaulted to {default}", camera_name, "DEBUG")
                 config[key] = default
-            
-            # Case 2: Value is set but below minimum
+
             elif val < min_allowed:
-                systemlog(
-                    f"'{key}: {val}' is invalid. Defaulting to {default}. Check your configuration", camera_name, "WARNING"
-                )
+                systemlog("'{key}: {val}' is invalid. Defaulting to {default}. Check your configuration", camera_name, "WARNING")
                 config[key] = default
         
         t = threading.Thread(target=start_camera_thread, args=(config, log_level))
@@ -186,7 +182,7 @@ if __name__ == "__main__":
         systemlog("Configuration error: no cameras configured, check configuration", "System", "CRITICAL")
         sys.exit(1)
     
-    systemlog(f"Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "System", "INFO")
+    systemlog("Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "System", "INFO")
     validate_and_start_cameras(camera_list, log_level)
         
     try:
@@ -194,6 +190,7 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         systemlog("Exiting...", "System", "WARNING")
+
 
 
 
