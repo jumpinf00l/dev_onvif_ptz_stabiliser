@@ -114,7 +114,8 @@ class ONVIFMonitorApp:
 
 def log(message: str, source: str = 'Unknown', level: str = 'INFO'):
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-    if log_levels.get(lvl_upper, 1) < self.min_level_value:
+    log_level_upper = level.upper()
+    if log_levels.get(log_level_upper, 1) < self.min_level_value:
         return
     severity_char = level[0]
     with print_lock:
@@ -187,6 +188,7 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         log(f"Keyboard interrupt, exiting...", "System", "WARNING")
+
 
 
 
