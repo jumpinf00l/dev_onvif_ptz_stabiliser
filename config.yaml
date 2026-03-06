@@ -1,5 +1,5 @@
 name: "ONVIF PTZ Helper"
-version: "2026.2.8"
+version: "2026.3.0"
 slug: "onvif_ptz_helper"
 description: "Helps some ONVIF cameras (e.g. Hikvision) which do not reliably update PTZ status to allow external services like Frigate Autotracking to work"
 url: "https://github.com/jumpinf00l/dev_onvif_ptz_stabiliser"
@@ -29,4 +29,4 @@ schema:
       reconnect_time: float(0,)?
       idle_polling_interval: float(0,)?
       active_polling_interval: float(0,)?
-      active_polling_threshold: int(2,)?
+      active_polling_history: int(2,)?
