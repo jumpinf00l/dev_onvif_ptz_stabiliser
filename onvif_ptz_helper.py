@@ -26,7 +26,6 @@ class ONVIFMonitorApp:
         self.idle_polling_interval = camera_config.get('idle_polling_interval', 0.3)
         self.active_polling_interval = camera_config.get('active_polling_interval', 0.3)
         self.active_polling_history = camera_config.get('active_polling_history', 2)
-        self.min_level_value = self.LEVELS.get(min_level.upper(), 1)
         self.cam: Optional[onvif.ONVIFCamera] = None
         self.ptz_service = None
         self.media_service = None
@@ -115,7 +114,7 @@ class ONVIFMonitorApp:
 def log(message: str, source: str = 'Unknown', level: str = 'INFO'):
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     log_level_upper = level.upper()
-    if log_levels.get(log_level_upper, 1) < self.min_level_value:
+    if log_levels.get(log_level_upper, 1) < min_level_value:
         return
     severity_char = level[0]
     with print_lock:
@@ -176,6 +175,8 @@ if __name__ == "__main__":
             'active_polling_history': int(os.getenv('ACTIVE_POLLING_HISTORY', '2')),
         }]
 
+    min_level_value = log_levels.get(log_level.upper(), 1)
+    
     if not camera_list:
         log(f"Configuration error: no cameras configured, check configuration", "System", "CRITICAL")
         sys.exit(1)
@@ -188,6 +189,7 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         log(f"Keyboard interrupt, exiting...", "System", "WARNING")
+
 
 
 
