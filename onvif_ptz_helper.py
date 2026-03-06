@@ -11,6 +11,8 @@ from zeep.transports import Transport
 import requests
 from typing import Optional, Dict
 
+print_lock = threading.Lock()
+
 class ONVIFMonitorApp:
     LEVELS = {'DEBUG': 0, 'INFO': 1, 'WARNING': 2, 'ERROR': 3, 'CRITICAL': 4}
 
@@ -114,7 +116,9 @@ class ONVIFMonitorApp:
 def log(message: str, source: str = 'Unknown', level: str = 'INFO'):
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     severity_char = level[0]
-    print(f"{now} - [{severity_char}] - [{source}] - {message}")
+    with print_lock:
+        print(f"{now} - [{severity_char}] - [{source}] - {message}")
+        sys.stdout.flush()
 
 def validate_and_start_cameras(camera_list, log_level):
     minimum_camera_values = {
@@ -182,6 +186,7 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         log(f"Keyboard interrupt, exiting...", "System", "WARNING")
+
 
 
 
