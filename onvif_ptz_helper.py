@@ -119,16 +119,38 @@ class ONVIFMonitorApp:
                 else:
                     time.sleep(self.reconnect_time)
 
+    def systemlog(message: str, level: str = 'INFO'):
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        severity_char = level[0]
+        print(f"{now} - [{severity_char}] - [SYSTEM] - {message}")
+
+def validate_and_start_cameras(camera_list, log_level):
+    MIN_VALS = {
+        'reconnect_time': (0, 5.0),
+        'idle_polling_interval': (0, 0.3),
+        'active_polling_interval': (0, 0.3),
+        'active_polling_threshold': (2, 2)
+    }
+    
+    for config in camera_list:
+        name = config.get('camera_name')
+        
+        for key, (min_allowed, default) in MIN_VALS.items():
+            val = config.get(key)
+            if val is None or val < min_allowed:
+                systemlog(f"[{name}] Configuration warning: '{key}: {val}' is invalid. Defaulting to {default}", "WARNING")
+                config[key] = default
+        
+        t = threading.Thread(target=start_camera_thread, args=(config, log_level))
+        t.daemon = True
+        t.start()
+
 def start_camera_thread(config, log_level):
     app = ONVIFMonitorApp(config, min_level=log_level)
     if app.connect():
         app.run()
 
 if __name__ == "__main__":
-    def systemlog(message: str, level: str = 'INFO'):
-        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        severity_char = level[0]
-        print(f"{now} - [{severity_char}] - [SYSTEM] - {message}")
     
     if os.path.exists('/data/options.json'):
         with open('/data/options.json') as f:
@@ -154,37 +176,17 @@ if __name__ == "__main__":
     if not camera_list:
         systemlog("Configuration error: no cameras configured, check configuration", "CRITICAL")
         sys.exit(1)
-
-    if reconnect_time < 0:
-        systemlog("Configuration warning: 'reconnect_time: {reconnect_time}' is below minimum 0, defaulted to 5", "WARNING")
-        reconnect_time = 5
-
-    if idle_polling_interval < 0:
-        systemlog("Configuration warning: 'idle_polling_interval: {idle_polling_interval}' is below minimum 0, defaulted to 0.3", "WARNING")
-        idle_polling_interval = 0.3
-
-    if active_polling_interval < 0:
-        systemlog("Configuration warning: 'active_polling_interval: {active_polling_interval}' is below minimum 0, defaulted to 0.3", "WARNING")
-        active_polling_interval = 0.3
-
-    if active_polling_history < 2:
-        systemlog("Configuration warning: 'active_polling_history: {active_polling_history}' is below minimum 2, defaulted to 2", "WARNING")
-        active_polling_history = 2
     
     systemlog(f"Started ONVIF PTZ Helper", "INFO")
     systemlog(f"Cameras configured: {len(camera_list)}", "INFO")
-    threads = []
-    for config in camera_list:
-        t = threading.Thread(target=start_camera_thread, args=(config, log_level))
-        t.daemon = True
-        threads.append(t)
-        t.start()
+    validate_and_start_cameras(camera_list, log_level)
         
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         systemlog("Exiting...", "WARNING")
+
 
 
 
