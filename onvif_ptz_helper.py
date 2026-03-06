@@ -4,6 +4,7 @@ import threading
 import json
 import os
 from datetime import datetime
+from collections import deque
 import onvif
 import zeep
 from zeep.transports import Transport
@@ -21,17 +22,15 @@ class ONVIFMonitorApp:
         self.password = camera_config['password']
         self.ignore_ssl = camera_config.get('ignore_ssl', False)
         self.reconnect_time = camera_config.get('reconnect_time', 5)
-        self.polling_interval = camera_config.get('polling_interval', 0.3)
-        self.fast_poll_on_move = camera_config.get('fast_poll_on_move', True)
-        
+        self.idle_polling_interval = camera_config.get('idle_polling_interval', 0.3)
+        self.active_polling_interval = camera_config.get('active_polling_interval', 0.3)
+        self.active_polling_history = camera_config.get('active_polling_history', 2)
         self.min_level_value = self.LEVELS.get(min_level.upper(), 1)
         self.cam: Optional[onvif.ONVIFCamera] = None
         self.ptz_service = None
         self.media_service = None
         self.token = None
-        self.prev_pan = None
-        self.prev_tilt = None
-        self.prev_zoom = None
+        self.history = deque(maxlen=self.active_polling_history)
         self.is_currently_moving = False
 
     def log(self, message: str, level: str = 'INFO'):
@@ -60,14 +59,16 @@ class ONVIFMonitorApp:
                     raise Exception("No ONVIF media service profiles found, cannot get PTZ token")
                 self.token = profiles[0].token
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
-                self.prev_pan = status.Position.PanTilt.x
-                self.prev_tilt = status.Position.PanTilt.y
-                self.prev_zoom = status.Position.Zoom.x
+                init_coords = (
+                    status.Position.PanTilt.x,
+                    status.Position.PanTilt.y,
+                    status.Position.Zoom.x
+                )
                 self.log(f"Connected to '{self.camera_name}': {self.host}:{self.port}", "INFO")
                 return True
             except Exception as e:
                 self.log(f"Connection failed: {e}", "CRITICAL")
-                self.log(f"Reattempting in {self.reconnect_time}s...", "INFO")
+                self.log(f"Attempting to reconnect in {self.reconnect_time}s...", "INFO")
                 time.sleep(self.reconnect_time)
 
     def send_stop_command(self):
@@ -83,14 +84,16 @@ class ONVIFMonitorApp:
         while True:
             try:
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
-                curr_pan = status.Position.PanTilt.x
-                curr_tilt = status.Position.PanTilt.y
-                curr_zoom = status.Position.Zoom.x
+                curr_coords = (
+                    status.Position.PanTilt.x,
+                    status.Position.PanTilt.y,
+                    status.Position.Zoom.x
+                )
                 curr_pantiltstatus = status.MoveStatus.PanTilt
                 curr_zoomstatus = status.MoveStatus.PanTilt
-                currently_moving = (curr_pan != self.prev_pan or curr_tilt != self.prev_tilt or curr_zoom != self.prev_zoom)
+                currently_moving = any(curr_coords != prev for prev in self.history)
                 
-                self.log(f"PTZ position: P:{curr_pan:.4f} T:{curr_tilt:.4f} Z:{curr_zoom:.4f}", "DEBUG")
+                self.log(f"PTZ position: P:{curr_coords[0]} T:{curr_coords[1]} Z:{curr_coords[2]}", "DEBUG")
                 self.log(f"PTZ position changing: {currently_moving}", "DEBUG")
                 self.log(f"PTZ status: PanTilt: {curr_pantiltstatus}, Zoom: {curr_zoomstatus}", "DEBUG")
 
@@ -98,19 +101,16 @@ class ONVIFMonitorApp:
                     if not self.is_currently_moving:
                         self.log("Movement detected, waiting for PTZ position to stabilise...", "INFO")
                         self.is_currently_moving = True
-                    if not self.fast_poll_on_move:
-                        time.sleep(self.polling_interval)
+                    time.sleep(self.active_polling_interval)
                 else:
                     if self.is_currently_moving:
                         self.log("PTZ position stabilised", "INFO")
                         self.send_stop_command()
                         self.is_currently_moving = False
                         self.log("Monitoring PTZ position...", "INFO")
-                    time.sleep(self.polling_interval)
+                    time.sleep(self.idle_polling_interval)
                 
-                self.prev_pan = curr_pan
-                self.prev_tilt = curr_tilt
-                self.prev_zoom = curr_zoom
+                self.history.append(curr_coords)
             except Exception as e:
                 self.log(f"Polling failed: {e}", "CRITICAL")
                 self.log("Reconnecting to camera...", "INFO")
@@ -133,10 +133,11 @@ if __name__ == "__main__":
     if os.path.exists('/data/options.json'):
         with open('/data/options.json') as f:
             config_data = json.load(f)
-            camera_list = config_data.get('cameras', [])
             log_level = config_data.get('log_level', 'INFO')
+            camera_list = config_data.get('cameras', [])
     else:
         # Fallback to Environment Variables
+        log_level = os.getenv('LOG_LEVEL', 'INFO')
         camera_list = [{
             'camera_name': os.getenv('CAMERA_NAME'),
             'host': os.getenv('host'),
@@ -144,16 +145,32 @@ if __name__ == "__main__":
             'username': os.getenv('USERNAME'),
             'password': os.getenv('PASSWORD'),
             'ignore_ssl': os.getenv('IGNORE_SSL', 'False').lower() == 'true',
-            'reconnect_time': int(os.getenv('RECONNECT_TIME', '5')),
-            'polling_interval': float(os.getenv('POLLING_INTERVAL', '0.3')),
-            'fast_poll_on_move': os.getenv('FAST_POLL_ON_MOVE', 'True').lower() == 'true'
+            'reconnect_time': float(os.getenv('RECONNECT_TIME', '5')),
+            'idle_polling_interval': float(os.getenv('IDLE_POLLING_INTERVAL', '0.3')),
+            'active_polling_interval': float(os.getenv('ACTIVE_POLLING_INTERVAL', '0.3')),
+            'active_polling_history': int(os.getenv('ACTIVE_POLLING_HISTORY', '2')),
         }]
-        log_level = os.getenv('LOG_LEVEL', 'INFO')
 
     if not camera_list:
-        systemlog("No cameras configured, check configuration", "CRITICAL")
+        systemlog("Configuration error: no cameras configured, check configuration", "CRITICAL")
         sys.exit(1)
 
+    if reconnect_time < 0:
+        systemlog("Configuration warning: 'reconnect_time: {reconnect_time}' is below minimum 0, defaulted to 5", "WARNING")
+        reconnect_time = 5
+
+    if idle_polling_interval < 0:
+        systemlog("Configuration warning: 'idle_polling_interval: {idle_polling_interval}' is below minimum 0, defaulted to 0.3", "WARNING")
+        idle_polling_interval = 0.3
+
+    if active_polling_interval < 0:
+        systemlog("Configuration warning: 'active_polling_interval: {active_polling_interval}' is below minimum 0, defaulted to 0.3", "WARNING")
+        active_polling_interval = 0.3
+
+    if active_polling_history < 2:
+        systemlog("Configuration warning: 'active_polling_history: {active_polling_history}' is below minimum 2, defaulted to 2", "WARNING")
+        active_polling_history = 2
+    
     systemlog(f"Started ONVIF PTZ Helper", "INFO")
     systemlog(f"Cameras configured: {len(camera_list)}", "INFO")
     threads = []
@@ -168,5 +185,6 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         systemlog("Exiting...", "WARNING")
+
 
 
