@@ -33,18 +33,10 @@ class ONVIFMonitorApp:
         self.history = deque(maxlen=self.active_polling_history)
         self.is_currently_moving = False
 
-    def log(self, message: str, level: str = 'INFO'):
-        lvl_upper = level.upper()
-        if self.LEVELS.get(lvl_upper, 1) < self.min_level_value:
-            return
-        severity_char = lvl_upper[0]
-        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        print(f"{now} - [{severity_char}] - [{self.camera_name}] - {message}")
-
     def connect(self):
         while True:
             try:
-                systemlog(f"Connecting to '{self.camera_name}': {self.host}:{self.port}...", {self.camera_name}, "INFO")
+                log(f"Connecting to '{self.camera_name}': {self.host}:{self.port}...", self.camera_name, "INFO")
                 transport = None
                 if self.ignore_ssl:
                     session = requests.Session()
@@ -64,23 +56,23 @@ class ONVIFMonitorApp:
                     status.Position.PanTilt.y,
                     status.Position.Zoom.x
                 )
-                systemlog(f"Connected to '{self.camera_name}': {self.host}:{self.port}", {self.camera_name}, "INFO")
+                log(f"Connected to '{self.camera_name}': {self.host}:{self.port}", self.camera_name, "INFO")
                 return True
             except Exception as e:
-                systemlog(f"Connection failed: {e}", {self.camera_name}, "CRITICAL")
-                systemlog(f"Attempting to reconnect in {self.reconnect_time}s...", {self.camera_name}, "INFO")
+                log(f"Connection failed: {e}", self.camera_name, "CRITICAL")
+                log(f"Attempting to reconnect in {self.reconnect_time}s...", self.camera_name, "INFO")
                 time.sleep(self.reconnect_time)
 
     def send_stop_command(self):
         try:
-            systemlog("Sending stop command...", {self.camera_name}, "INFO")
+            log("Sending stop command...", self.camera_name, "INFO")
             self.ptz_service.Stop({'ProfileToken': self.token, 'PanTilt': True, 'Zoom': True})
-            systemlog("Stop command sent", {self.camera_name}, "INFO")
+            log("Stop command sent", self.camera_name, "INFO")
         except Exception as e:
-            systemlog(f"Stop command failed: {e}", {self.camera_name}, "ERROR")
+            log(f"Stop command failed: {e}", self.camera_name, "ERROR")
 
     def run(self):
-        systemlog("Monitoring PTZ position...", {self.camera_name}, "INFO")
+        log("Monitoring PTZ position...", self.camera_name, "INFO")
         while True:
             try:
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
@@ -93,33 +85,33 @@ class ONVIFMonitorApp:
                 curr_zoomstatus = status.MoveStatus.PanTilt
                 currently_moving = any(curr_coords != prev for prev in self.history)
                 
-                systemlog(f"PTZ position: P:{curr_coords[0]} T:{curr_coords[1]} Z:{curr_coords[2]}", {self.camera_name}, "DEBUG")
-                systemlog(f"PTZ position changing: {currently_moving}", {self.camera_name}, "DEBUG")
-                systemlog(f"PTZ status: PanTilt: {curr_pantiltstatus}, Zoom: {curr_zoomstatus}", {self.camera_name}, "DEBUG")
+                log(f"PTZ position: P:{curr_coords[0]} T:{curr_coords[1]} Z:{curr_coords[2]}", self.camera_name, "DEBUG")
+                log(f"PTZ position changing: {currently_moving}", self.camera_name, "DEBUG")
+                log(f"PTZ status: PanTilt: {curr_pantiltstatus}, Zoom: {curr_zoomstatus}", self.camera_name, "DEBUG")
 
                 if currently_moving:
                     if not self.is_currently_moving:
-                        systemlog("Movement detected, waiting for PTZ position to stabilise...", {self.camera_name}, "INFO")
+                        log("Movement detected, waiting for PTZ position to stabilise...", self.camera_name, "INFO")
                         self.is_currently_moving = True
                     time.sleep(self.active_polling_interval)
                 else:
                     if self.is_currently_moving:
-                        systemlog("PTZ position stabilised", {self.camera_name}, "INFO")
+                        log("PTZ position stabilised", self.camera_name, "INFO")
                         self.send_stop_command()
                         self.is_currently_moving = False
-                        systemlog("Monitoring PTZ position...", {self.camera_name}, "INFO")
+                        log("Monitoring PTZ position...", self.camera_name, "INFO")
                     time.sleep(self.idle_polling_interval)
                 
                 self.history.append(curr_coords)
             except Exception as e:
-                systemlog(f"Polling failed: {e}", {self.camera_name}, "CRITICAL")
-                systemlog("Reconnecting to camera...", {self.camera_name}, "INFO")
+                log(f"Polling failed: {e}", self.camera_name, "CRITICAL")
+                log("Reconnecting to camera...", self.camera_name, "INFO")
                 if self.connect():
-                    systemlog("Reconnected to camera, resuming polling...", {self.camera_name}, "INFO")
+                    log("Reconnected to camera, resuming polling...", self.camera_name, "INFO")
                 else:
                     time.sleep(self.reconnect_time)
 
-def systemlog(message: str, source: str = 'Unknown', level: str = 'INFO'):
+def log(message: str, source: str = 'Unknown', level: str = 'INFO'):
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     severity_char = level[0]
     print(f"{now} - [{severity_char}] - [{source}] - {message}")
@@ -139,11 +131,11 @@ def validate_and_start_cameras(camera_list, log_level):
             val = config.get(key)
 
             if val is None:
-                systemlog("'{key}' defaulted to {default}", camera_name, "DEBUG")
+                log("'{key}' defaulted to {default}", camera_name, "DEBUG")
                 config[key] = default
 
             elif val < min_allowed:
-                systemlog("'{key}: {val}' is invalid. Defaulting to {default}. Check your configuration", camera_name, "WARNING")
+                log("'{key}: {val}' is invalid. Defaulting to {default}. Check your configuration", camera_name, "WARNING")
                 config[key] = default
         
         t = threading.Thread(target=start_camera_thread, args=(config, log_level))
@@ -179,17 +171,18 @@ if __name__ == "__main__":
         }]
 
     if not camera_list:
-        systemlog("Configuration error: no cameras configured, check configuration", "System", "CRITICAL")
+        log("Configuration error: no cameras configured, check configuration", "System", "CRITICAL")
         sys.exit(1)
     
-    systemlog("Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "System", "INFO")
+    log("Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "System", "INFO")
     validate_and_start_cameras(camera_list, log_level)
         
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        systemlog("Exiting...", "System", "WARNING")
+        log("Keyboard interrupt, exiting...", "System", "WARNING")
+
 
 
 
