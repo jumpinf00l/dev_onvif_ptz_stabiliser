@@ -30,7 +30,3 @@ schema:
       idle_polling_interval: float(0,)?
       active_polling_interval: float(0,)?
       active_polling_threshold: int(2,)?
-
-
-      fast_poll_on_move: bool?
-
