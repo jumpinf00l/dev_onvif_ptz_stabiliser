@@ -1,3 +1,4 @@
+# Import standard libraries for timing, system operations, threading, and data handling
 import time
 import sys
 import threading
@@ -5,17 +6,23 @@ import json
 import os
 from datetime import datetime
 from collections import deque
+
+# Import ONVIF and SOAP (zeep) libraries for camera communication
 import onvif
 import zeep
 from zeep.transports import Transport
 import requests
 from typing import Optional, Dict
 
+# initialise thread lock for thread-safe printing and define logging severity mapping
 print_lock = threading.Lock()
 log_levels = {'DEBUG': 0, 'INFO': 1, 'WARNING': 2, 'ERROR': 3, 'CRITICAL': 4}
 
 class ONVIFMonitorApp:
+    """Main application class to monitor and manage a specific ONVIF camera's PTZ state."""
+    
     def __init__(self, camera_config: Dict, min_level: str = 'INFO'):
+        # initialise camera connection details and configuration parameters
         self.camera_name = camera_config['camera_name']
         self.host = camera_config['host']
         self.port = camera_config['port']
@@ -26,6 +33,8 @@ class ONVIFMonitorApp:
         self.idle_polling_interval = camera_config.get('idle_polling_interval', 0.3)
         self.active_polling_interval = camera_config.get('active_polling_interval', 0.3)
         self.active_polling_history = camera_config.get('active_polling_history', 2)
+        
+        # Internal state for ONVIF services and movement tracking
         self.cam: Optional[onvif.ONVIFCamera] = None
         self.ptz_service = None
         self.media_service = None
@@ -34,22 +43,31 @@ class ONVIFMonitorApp:
         self.is_currently_moving = False
 
     def connect(self):
+        """Establishes connection to the camera and initialises PTZ services."""
         while True:
             try:
                 log(f"Connecting to '{self.camera_name}': {self.host}:{self.port}...", self.camera_name, "INFO")
                 transport = None
+                
+                # Configure transport to bypass SSL verification if requested
                 if self.ignore_ssl:
                     session = requests.Session()
                     session.verify = False
                     requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
                     transport = Transport(session=session)
+                
+                # initialise camera and create necessary SOAP service clients
                 self.cam = onvif.ONVIFCamera(self.host, self.port, self.user, self.password, transport=transport)
                 self.media_service = self.cam.create_media_service()
                 self.ptz_service = self.cam.create_ptz_service()
+                
+                # Retrieve the media profile token required for PTZ commands
                 profiles = self.media_service.GetProfiles()
                 if not profiles:
                     raise Exception("No ONVIF media service profiles found, cannot get PTZ token")
                 self.token = profiles[0].token
+                
+                # Verify connection by fetching initial PTZ status
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
                 init_coords = (
                     status.Position.PanTilt.x,
@@ -64,6 +82,7 @@ class ONVIFMonitorApp:
                 time.sleep(self.reconnect_time)
 
     def send_stop_command(self):
+        """Sends a PTZ Stop command to the camera to halt movement."""
         try:
             log(f"Sending stop command...", self.camera_name, "INFO")
             self.ptz_service.Stop({'ProfileToken': self.token, 'PanTilt': True, 'Zoom': True})
@@ -72,9 +91,11 @@ class ONVIFMonitorApp:
             log(f"Stop command failed: {e}", self.camera_name, "ERROR")
 
     def run(self):
+        """Main monitoring loop that detects movement and sends stop commands upon stabilization."""
         log(f"Monitoring PTZ position...", self.camera_name, "INFO")
         while True:
             try:
+                # Fetch current PTZ coordinates and movement status
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
                 curr_coords = (
                     status.Position.PanTilt.x,
@@ -83,6 +104,8 @@ class ONVIFMonitorApp:
                 )
                 curr_pantiltstatus = status.MoveStatus.PanTilt
                 curr_zoomstatus = status.MoveStatus.PanTilt
+                
+                # Determine movement by comparing current coordinates against history
                 currently_moving = any(curr_coords != prev for prev in self.history)
                 
                 log(f"PTZ position: P:{curr_coords[0]} T:{curr_coords[1]} Z:{curr_coords[2]}", self.camera_name, "DEBUG")
@@ -90,11 +113,13 @@ class ONVIFMonitorApp:
                 log(f"PTZ reported status: PanTilt: {curr_pantiltstatus}, Zoom: {curr_zoomstatus}", self.camera_name, "DEBUG")
 
                 if currently_moving:
+                    # If movement just started, update state and poll at the active rate
                     if not self.is_currently_moving:
                         log(f"Movement detected, waiting for PTZ position to stabilise...", self.camera_name, "INFO")
                         self.is_currently_moving = True
                     time.sleep(self.active_polling_interval)
                 else:
+                    # If movement has stopped after being active, send the stop command (helper function)
                     if self.is_currently_moving:
                         log(f"PTZ position stabilised", self.camera_name, "INFO")
                         self.send_stop_command()
@@ -102,8 +127,10 @@ class ONVIFMonitorApp:
                         log(f"Monitoring PTZ position...", self.camera_name, "INFO")
                     time.sleep(self.idle_polling_interval)
                 
+                # Update coordinate history for the next comparison
                 self.history.append(curr_coords)
             except Exception as e:
+                # Handle communication failures by attempting to reconnect
                 log(f"Polling failed: {e}", self.camera_name, "CRITICAL")
                 log(f"Reconnecting to camera...", self.camera_name, "INFO")
                 if self.connect():
@@ -112,16 +139,19 @@ class ONVIFMonitorApp:
                     time.sleep(self.reconnect_time)
 
 def log(message: str, source: str = 'Unknown', level: str = 'INFO'):
-    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+    """Utility function for formatted, thread-safe logging to stdout."""
     log_level_upper = level.upper()
+    # Filter logs based on the global minimum log level
     if log_levels.get(log_level_upper, 1) < min_level_value:
         return
     severity_char = level[0]
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     with print_lock:
         print(f"{now} - [{severity_char}] - [{source}] - {message}")
         sys.stdout.flush()
 
 def validate_and_start_cameras(camera_list, log_level):
+    """Validates configuration values for each camera and spawns monitoring threads."""
     minimum_camera_values = {
         'reconnect_time': (0, 5.0),
         'idle_polling_interval': (0, 0.3),
@@ -132,6 +162,7 @@ def validate_and_start_cameras(camera_list, log_level):
     for config in camera_list:
         camera_name = config.get('camera_name', 'Unknown')
         
+        # Check config against minimum thresholds; default if missing or invalid
         for key, (min_allowed, default) in minimum_camera_values.items():
             val = config.get(key)
 
@@ -143,24 +174,26 @@ def validate_and_start_cameras(camera_list, log_level):
                 log(f"'{key}: {val}' is invalid. Defaulting to {default}. Check your configuration", camera_name, "WARNING")
                 config[key] = default
         
+        # Start a dedicated daemon thread for each camera
         t = threading.Thread(target=start_camera_thread, args=(config, log_level))
         t.daemon = True
         t.start()
 
 def start_camera_thread(config, log_level):
+    """Entry point for camera threads: initialises the app and starts the run loop."""
     app = ONVIFMonitorApp(config, min_level=log_level)
     if app.connect():
         app.run()
 
 if __name__ == "__main__":
-    
+    # Load configuration from Hass.io options JSON file or environment variables
     if os.path.exists('/data/options.json'):
         with open('/data/options.json') as f:
             config_data = json.load(f)
             log_level = config_data.get('log_level', 'INFO')
             camera_list = config_data.get('cameras', [])
     else:
-        # Fallback to Environment Variables
+        # Fallback to Environment Variables for standalone/Docker usage
         log_level = os.getenv('LOG_LEVEL', 'INFO')
         camera_list = [{
             'camera_name': os.getenv('CAMERA_NAME'),
@@ -175,6 +208,7 @@ if __name__ == "__main__":
             'active_polling_history': int(os.getenv('ACTIVE_POLLING_HISTORY', '2')),
         }]
 
+    # Set the global log level threshold
     min_level_value = log_levels.get(log_level.upper(), 1)
     
     if not camera_list:
@@ -182,22 +216,13 @@ if __name__ == "__main__":
         sys.exit(1)
     
     log(f"Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "System", "INFO")
+    
+    # Begin the validation and thread startup process
     validate_and_start_cameras(camera_list, log_level)
         
+    # Keep the main process alive to allow daemon threads to run
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         log(f"Keyboard interrupt, exiting...", "System", "WARNING")
-
-
-
-
-
-
-
-
-
-
-
-
