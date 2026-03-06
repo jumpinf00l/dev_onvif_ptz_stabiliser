@@ -44,7 +44,7 @@ class ONVIFMonitorApp:
     def connect(self):
         while True:
             try:
-                self.log(f"Connecting to '{self.camera_name}': {self.host}:{self.port}...", "INFO")
+                systemlog(f"Connecting to '{self.camera_name}': {self.host}:{self.port}...", {self.camera_name}, "INFO")
                 transport = None
                 if self.ignore_ssl:
                     session = requests.Session()
@@ -64,23 +64,23 @@ class ONVIFMonitorApp:
                     status.Position.PanTilt.y,
                     status.Position.Zoom.x
                 )
-                self.log(f"Connected to '{self.camera_name}': {self.host}:{self.port}", "INFO")
+                systemlog(f"Connected to '{self.camera_name}': {self.host}:{self.port}", {self.camera_name}, "INFO")
                 return True
             except Exception as e:
-                self.log(f"Connection failed: {e}", "CRITICAL")
-                self.log(f"Attempting to reconnect in {self.reconnect_time}s...", "INFO")
+                systemlog(f"Connection failed: {e}", {self.camera_name}, "CRITICAL")
+                systemlog(f"Attempting to reconnect in {self.reconnect_time}s...", {self.camera_name}, "INFO")
                 time.sleep(self.reconnect_time)
 
     def send_stop_command(self):
         try:
-            self.log("Sending stop command...", "INFO")
+            systemlog("Sending stop command...", {self.camera_name}, "INFO")
             self.ptz_service.Stop({'ProfileToken': self.token, 'PanTilt': True, 'Zoom': True})
-            self.log("Stop command sent", "INFO")
+            systemlog("Stop command sent", {self.camera_name}, "INFO")
         except Exception as e:
-            self.log(f"Stop command failed: {e}", "ERROR")
+            systemlog(f"Stop command failed: {e}", {self.camera_name}, "ERROR")
 
     def run(self):
-        self.log("Monitoring PTZ position...", "INFO")
+        systemlog("Monitoring PTZ position...", {self.camera_name}, "INFO")
         while True:
             try:
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
@@ -93,29 +93,29 @@ class ONVIFMonitorApp:
                 curr_zoomstatus = status.MoveStatus.PanTilt
                 currently_moving = any(curr_coords != prev for prev in self.history)
                 
-                self.log(f"PTZ position: P:{curr_coords[0]} T:{curr_coords[1]} Z:{curr_coords[2]}", "DEBUG")
-                self.log(f"PTZ position changing: {currently_moving}", "DEBUG")
-                self.log(f"PTZ status: PanTilt: {curr_pantiltstatus}, Zoom: {curr_zoomstatus}", "DEBUG")
+                systemlog(f"PTZ position: P:{curr_coords[0]} T:{curr_coords[1]} Z:{curr_coords[2]}", {self.camera_name}, "DEBUG")
+                systemlog(f"PTZ position changing: {currently_moving}", {self.camera_name}, "DEBUG")
+                systemlog(f"PTZ status: PanTilt: {curr_pantiltstatus}, Zoom: {curr_zoomstatus}", {self.camera_name}, "DEBUG")
 
                 if currently_moving:
                     if not self.is_currently_moving:
-                        self.log("Movement detected, waiting for PTZ position to stabilise...", "INFO")
+                        systemlog("Movement detected, waiting for PTZ position to stabilise...", {self.camera_name}, "INFO")
                         self.is_currently_moving = True
                     time.sleep(self.active_polling_interval)
                 else:
                     if self.is_currently_moving:
-                        self.log("PTZ position stabilised", "INFO")
+                        systemlog("PTZ position stabilised", {self.camera_name}, "INFO")
                         self.send_stop_command()
                         self.is_currently_moving = False
-                        self.log("Monitoring PTZ position...", "INFO")
+                        systemlog("Monitoring PTZ position...", {self.camera_name}, "INFO")
                     time.sleep(self.idle_polling_interval)
                 
                 self.history.append(curr_coords)
             except Exception as e:
-                self.log(f"Polling failed: {e}", "CRITICAL")
-                self.log("Reconnecting to camera...", "INFO")
+                systemlog(f"Polling failed: {e}", {self.camera_name}, "CRITICAL")
+                systemlog("Reconnecting to camera...", {self.camera_name}, "INFO")
                 if self.connect():
-                    self.log("Reconnected to camera, resuming polling...", "INFO")
+                    systemlog("Reconnected to camera, resuming polling...", {self.camera_name}, "INFO")
                 else:
                     time.sleep(self.reconnect_time)
 
@@ -190,6 +190,7 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         systemlog("Exiting...", "System", "WARNING")
+
 
 
 
