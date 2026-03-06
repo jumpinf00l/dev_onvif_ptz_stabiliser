@@ -119,26 +119,35 @@ class ONVIFMonitorApp:
                 else:
                     time.sleep(self.reconnect_time)
 
-def systemlog(message: str, level: str = 'INFO'):
+def systemlog(message: str, source: str = 'Unknown', level: str = 'INFO'):
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     severity_char = level[0]
-    print(f"{now} - [{severity_char}] - [SYSTEM] - {message}")
+    print(f"{now} - [{severity_char}] - [{source}] - {message}")
 
 def validate_and_start_cameras(camera_list, log_level):
-    MIN_VALS = {
+    minimum_camera_values = {
         'reconnect_time': (0, 5.0),
         'idle_polling_interval': (0, 0.3),
         'active_polling_interval': (0, 0.3),
-        'active_polling_threshold': (2, 2)
+        'active_polling_history': (2, 2)
     }
     
     for config in camera_list:
-        name = config.get('camera_name')
+        name = config.get('camera_name', 'Unknown')
         
-        for key, (min_allowed, default) in MIN_VALS.items():
+        for key, (min_allowed, default) in minimum_camera_values.items():
             val = config.get(key)
-            if val is None or val < min_allowed:
-                systemlog(f"[{name}] Configuration warning: '{key}: {val}' is invalid. Defaulting to {default}", "WARNING")
+            
+            # Case 1: Value is not set (None)
+            if val is None:
+                systemlog(f" '{key}' defaulted to {default}", {name}, "DEBUG")
+                config[key] = default
+            
+            # Case 2: Value is set but below minimum
+            elif val < min_allowed:
+                systemlog(
+                    f"'{key}: {val}' is invalid. Defaulting to {default}. Check your configuration", {name}, "WARNING"
+                )
                 config[key] = default
         
         t = threading.Thread(target=start_camera_thread, args=(config, log_level))
@@ -174,14 +183,15 @@ if __name__ == "__main__":
         }]
 
     if not camera_list:
-        systemlog("Configuration error: no cameras configured, check configuration", "CRITICAL")
+        systemlog("Configuration error: no cameras configured, check configuration", "System", "CRITICAL")
         sys.exit(1)
     
-    systemlog(f"Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "INFO")
+    systemlog(f"Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "System", "INFO")
     validate_and_start_cameras(camera_list, log_level)
         
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        systemlog("Exiting...", "WARNING")
+        systemlog("Exiting...", "System", "WARNING")
+
