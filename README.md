@@ -1,7 +1,7 @@
 # ONVIF PTZ Helper
-A lightweight Home Assistant App (formerly Add-On) designed to help PTZ cameras which don't reliably report or update their 'PanTilt' and 'Zoom' status, such as continuing to report "Moving" when the camera is not actually moving and not reporting "Idle". It detects changes in the PTZ coordinates and automatically sends a 'Stop' command once the camera stabilises, which ensures that the camera updates the 'PanTilt' and 'Zoom' statuses to "Idle".
+A lightweight Home Assistant App (formerly Add-On) to help PTZ cameras which don't reliably report or update their 'PanTilt' and 'Zoom' status, such as continuing to report "Moving" when the camera is not actually moving and not reporting "Idle". It detects changes in the PTZ coordinates and automatically sends a 'Stop' command once the camera stabilises, which ensures that the camera updates the 'PanTilt' and 'Zoom' statuses to "Idle".
 
-This app was specifically designed to assist with adding [Frigate Autotracking](https://docs.frigate.video/configuration/autotracking/) to unsupported cameras such as the ones tested below, but it may help with other applications or services which rely on reliable 'PanTilt' and 'Zoom' statuses.
+This app was specifically developed to assist with adding [Frigate Autotracking](https://docs.frigate.video/configuration/autotracking/) to unsupported cameras such as the ones tested below, but it may help with other applications or services which rely on reliable 'PanTilt' and 'Zoom' statuses.
 
 ## 🚀 Features
 - <b>Lightweight:</b> Consumes bugger all system resources on the Home Assistant host.
@@ -42,13 +42,13 @@ The below camera makes and models have been tested with Frigate Autotracking.
 
 [![Open your Home Assistant instance and show the dashboard of an app.](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_addon/?addon=896fce98_onvif_ptz_helper&repository_url=https%3A%2F%2Fgithub.com%2Fjumpinf00l%2Fdev_onvif_ptz_stabiliser)
 
-3. Configure the settings via the Configuration tab (see [Configuration](#configuration))
+3. Configure the options via the Configuration tab (see [Configuration](#configuration))
 
 ## ℹ️ General Notes
 The following notes apply in all cases.
-- Don't use your camera's admin account, a dedicated camera account for ONVIF PTZ Helper is recommended for security. Enable only the bare essentials required to allow ONVIF PTZ Helper to log into and control PTZ - video streaming is not used and not required.
-- You may need to enable the ONVIF protocol or configure a separate ONVIF account in your camera's configuration. See the manufacturer's documentation for further information.
-- Avoid overloading your camera's CPU with unnecessarily short polling intervals especially once PTZ movement is detected when CPU usage is most likely at its highest. Most cameras will take around 0.5 - 1 second to move to any position, so polling intervals that are short enough to detect PTZ movement starting and stopping in a timely fashion are all that is needed.
+- Don't use your camera's admin account, a dedicated camera account for ONVIF PTZ Helper is recommended for security. Configure only the essential security roles/permissions required to allow ONVIF PTZ Helper to log into and control PTZ - video streaming is specifically not used and not required.
+- You may need to enable the ONVIF interface or configure a separate ONVIF account in your camera's configuration. See the manufacturer's documentation for further information.
+- Avoid overloading your camera's CPU with unnecessarily short polling intervals, especially once PTZ movement is detected when CPU usage is most likely at its highest. Most cameras will take around 0.5 - 1 second to move to any position, so polling intervals that are short enough to detect PTZ movement starting and stopping in a timely fashion are all that is needed.
 
 ## 🦅 Frigate Notes
 The following notes are specific to Frigate Autotracking, but may apply to other applications or services.
@@ -59,7 +59,7 @@ The following notes are specific to Frigate Autotracking, but may apply to other
 > <b>The Frigate web service will not run during Autotracking calibration (see [Frigate Camera Autotracking > Calibration](https://docs.frigate.video/configuration/autotracking/#calibration))</b>.<br>This is normal and prevents other Frigate services from interrupting the Autotracking calibration. This is not a result of ONVIF PTZ Helper, and the web service will start once calibration is complete which may take several minutes. If there are no Autotracking progress updates in the Frigate App/container logs console after the initial update, check your ONVIF PTZ Helper configuration and log output to confirm that it is able to connect to the camera and poll its 'PanTilt' and 'Zoom' correctly (try 'DEBUG' logging).
 
 ## ⚙️ Configuration<a name="configuration"></a>
-### Schema
+### Configuration options
 The ONVIF PTZ Helper Home Assistant App accepts the below configuration:
 
 | Option | Sub-option | YAML option | Description | Type | Required | Example | Default |
