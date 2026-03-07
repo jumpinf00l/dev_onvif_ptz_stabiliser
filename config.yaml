@@ -1,5 +1,5 @@
 name: "ONVIF PTZ Helper"
-version: "2026.3.15"
+version: "2026.3.16"
 slug: "onvif_ptz_helper"
 description: "Helps some ONVIF cameras that don't update their PTZ movement to idle"
 url: "https://github.com/jumpinf00l/dev_onvif_ptz_stabiliser"
@@ -22,11 +22,12 @@ schema:
     - camera_name: str
       host: str
       port: port
+      ignore_ssl: bool?
       username: str
       password: password
-      ignore_ssl: bool?
       reconnect_time: float(0,)?
       idle_polling_interval: float(0,)?
       active_polling_interval: float(0,)?
       active_polling_history: int(2,)?
+
 
