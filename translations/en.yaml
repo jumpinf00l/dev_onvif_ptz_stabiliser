@@ -8,7 +8,7 @@ configuration:
     fields:
       camera_name:
         name: "Camera Name"
-        description: " A friendly camera name for configuration and logging."
+        description: "A friendly camera name for configuration and logging."
       host:
         name: "Hostname/IP Address"
         description: "The hostname or IP address of the camera."
