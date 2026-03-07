@@ -42,7 +42,7 @@ The below camera makes and models have been tested with Frigate Autotracking.
 
 [![Open your Home Assistant instance and show the dashboard of an app.](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_addon/?addon=896fce98_onvif_ptz_helper&repository_url=https%3A%2F%2Fgithub.com%2Fjumpinf00l%2Fdev_onvif_ptz_stabiliser)
 
-3. Configure the settings via the Configuration tab
+3. Configure the settings via the Configuration tab (see [Configuration](#configuration))
 
 ## ℹ️ General Notes
 The following notes apply in all cases.
@@ -56,9 +56,9 @@ The following notes are specific to Frigate Autotracking, but may apply to other
 - Set the configuration conservatively at first to account for slower camera motors, then try to reduce the idle and active intervals to tune the best performance for your camera.
 - Retry Autotracking calibration with your desired configuration 2-3 times before changing your configuration since it may fail the first time but succeed following times with no changes.
 > [!CAUTION]
-> <b>The Frigate web service will not run during Autotracking calibration</b>.<br>This is normal and prevents other Frigate services from interrupting the Autotracking calibration. This is not a result of ONVIF PTZ Helper, and the web service will start once calibration is complete which may take several minutes. If there are no Autotracking progress updates in the Frigate App/container logs console after the initial update, check your ONVIF PTZ Helper configuration and log output to confirm that it is able to connect to the camera and poll its 'PanTilt' and 'Zoom' correctly (try 'DEBUG' logging).
+> <b>The Frigate web service will not run during Autotracking calibration (see [Frigate Camera Autotracking > Calibration](https://docs.frigate.video/configuration/autotracking/#calibration))</b>.<br>This is normal and prevents other Frigate services from interrupting the Autotracking calibration. This is not a result of ONVIF PTZ Helper, and the web service will start once calibration is complete which may take several minutes. If there are no Autotracking progress updates in the Frigate App/container logs console after the initial update, check your ONVIF PTZ Helper configuration and log output to confirm that it is able to connect to the camera and poll its 'PanTilt' and 'Zoom' correctly (try 'DEBUG' logging).
 
-## ⚙️ Configuration
+## ⚙️ Configuration<a name="configuration"></a>
 ### Schema
 The ONVIF PTZ Helper Home Assistant App accepts the below configuration:
 
