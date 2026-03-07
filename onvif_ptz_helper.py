@@ -21,8 +21,8 @@ log_levels = {'DEBUG': 0, 'INFO': 1, 'WARNING': 2, 'ERROR': 3, 'CRITICAL': 4}
 # Initial global threshold for logging (updated dynamically at runtime)
 min_level_value = 1  
 
-class ONVIFMonitorApp:
-    """Class to manage monitoring and PTZ stop-command logic for a specific camera."""
+class onvif_ptz_helper:
+    """Manages monitoring and PTZ stop command logic for a specific camera."""
     def __init__(self, camera_config: Dict, min_level: str = 'INFO'):
         # Load configuration from the provided dictionary
         self.camera_name = camera_config['camera_name']
@@ -44,7 +44,7 @@ class ONVIFMonitorApp:
         self.history = deque(maxlen=self.active_polling_history)
         self.is_currently_moving = False
         
-        # EFFICIENCY: Create and store the Transport layer once to reuse for all requests/reconnects
+        # Create and store the Transport layer once to reuse for all requests/reconnects
         self.transport = None
         if self.ignore_ssl:
             self.session = requests.Session()
@@ -81,11 +81,11 @@ class ONVIFMonitorApp:
                 time.sleep(self.reconnect_time)
 
     def send_stop_command(self):
-        """Sends a PTZ Stop request to the camera to halt any ongoing pan, tilt, or zoom."""
+        """Sends a PTZ Stop request to the camera to make it report pan/tilt and zoom status as idle."""
         try:
-            log(f"Sending stop command...", self.camera_name, "INFO")
+            log(f"Sending stop command...", self.camera_name, "DEBUG")
             self.ptz_service.Stop({'ProfileToken': self.token, 'PanTilt': True, 'Zoom': True})
-            log(f"Stop command sent", self.camera_name, "INFO")
+            log(f"Stop command sent", self.camera_name, "DEBUG")
         except Exception as e:
             log(f"Stop command failed: {e}", self.camera_name, "ERROR")
 
@@ -93,7 +93,7 @@ class ONVIFMonitorApp:
         """Main monitoring loop that checks for PTZ movement and triggers stabilization logic."""
         log(f"Monitoring PTZ position...", self.camera_name, "INFO")
         
-        # EFFICIENCY: Cache frequently called methods and objects to local variables
+        # Cache frequently called methods and objects to local variables
         profile_token = {'ProfileToken': self.token}
         get_status = self.ptz_service.GetStatus
         
@@ -106,30 +106,34 @@ class ONVIFMonitorApp:
                     status.Position.PanTilt.y,
                     status.Position.Zoom.x
                 )
+
+                # Query the camera for reported pan/tilt and zoom status from the camera for information
+                pantiltstatus = status.MoveStatus.PanTilt
+                zoomstatus = status.MoveStatus.PanTilt
                 
-                # EFFICIENCY: Movement is detected if the current position differs from any in history
+                # PTZ movement is detected if the current position differs from any in history
                 currently_moving = any(curr_coords != prev for prev in self.history)
                 
-                log(f"PTZ position: P:{curr_coords[0]} T:{curr_coords[1]} Z:{curr_coords[2]}", self.camera_name, "DEBUG")
+                log(f"Reported PTZ position: P:{curr_coords[0]} T:{curr_coords[1]} Z:{curr_coords[2]}", self.camera_name, "DEBUG")
+                log(f"Reported PTZ status: PanTilt: {pantiltstatus}, Zoom: {zoomstatus}", self.camera_name, "DEBUG")
                 log(f"PTZ position changing: {currently_moving}", self.camera_name, "DEBUG")
 
                 if currently_moving:
-                    # If movement is newly detected, change state and poll faster
+                    # If PTZ movement is newly detected, change state and use active polling interval
                     if not self.is_currently_moving:
-                        log(f"Movement detected, waiting for PTZ position to stabilise...", self.camera_name, "INFO")
+                        log(f"PTZ position changing, waiting for PTZ position to stabilise...", self.camera_name, "INFO")
                         self.is_currently_moving = True
                     time.sleep(self.active_polling_interval)
                 else:
-                    # If movement was active but has now stopped, finalise with a stop command
+                    # If movement was active but has now stopped, send stop command
                     if self.is_currently_moving:
                         log(f"PTZ position stabilised", self.camera_name, "INFO")
                         self.send_stop_command()
                         self.is_currently_moving = False
-                        log(f"Monitoring PTZ position...", self.camera_name, "INFO")
-                    # Use a slower polling interval when the camera is idle
+                    # Use idle polling interval
                     time.sleep(self.idle_polling_interval)
                 
-                # Update the history deque with the newest coordinates
+                # Update the history deque with the current coordinates
                 self.history.append(curr_coords)
             except Exception as e:
                 # Handle unexpected disconnects or errors by attempting a full reconnection
@@ -144,17 +148,18 @@ class ONVIFMonitorApp:
                     time.sleep(self.reconnect_time)
 
 def log(message: str, source: str = 'Unknown', level: str = 'INFO'):
-    """Utility for printing formatted logs with priority filtering and timestamping."""
+    """Prints formatted logs with priority filtering and timestamping."""
     log_level_upper = level.upper()
-    # EFFICIENCY: Check level first before performing string formatting or I/O
+    # Check level first before formatting or printing
     if log_levels.get(log_level_upper, 1) < min_level_value:
         return
         
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     severity_char = level[0]
+    # Use print_lock and flush output to avoid doubling up output from multiple threads
     with print_lock:
         print(f"{now} - [{severity_char}] - [{source}] - {message}")
-        # Force the output to flush to the console immediately (crucial for Docker/Services)
+        # Force the output to flush to the console
         sys.stdout.flush()
 
 def validate_and_start_cameras(camera_list, log_level):
@@ -176,7 +181,7 @@ def validate_and_start_cameras(camera_list, log_level):
                 log(f"Defaulted '{key}' to {default}", camera_name, "DEBUG")
                 config[key] = default
             elif val < min_allowed:
-                log(f"'{key}: {val}' is invalid. Defaulting to {default}.", camera_name, "WARNING")
+                log(f"Configuration '{key}: {val}' is invalid. Defaulted '{key}' to {default}, check your configuration", camera_name, "WARNING")
                 config[key] = default
         
         # Launch each camera monitor as a background daemon thread
@@ -185,8 +190,8 @@ def validate_and_start_cameras(camera_list, log_level):
         t.start()
 
 def start_camera_thread(config, log_level):
-    """Helper function to initialise and run the application instance within a thread."""
-    app = ONVIFMonitorApp(config, min_level=log_level)
+    """Initialises and runs the application instance within a thread."""
+    app = onvif_ptz_helper(config, min_level=log_level)
     if app.connect():
         app.run()
 
@@ -198,7 +203,7 @@ if __name__ == "__main__":
             log_level = config_data.get('log_level', 'INFO')
             camera_list = config_data.get('cameras', [])
     else:
-        # Fallback to Environment Variables for standalone or testing environments
+        # Fallback to Environment Variables for non-Home Assistant environments
         log_level = os.getenv('LOG_LEVEL', 'INFO')
         camera_list = [{
             'camera_name': os.getenv('CAMERA_NAME'),
@@ -218,15 +223,15 @@ if __name__ == "__main__":
     
     # Ensure there is at least one camera configured before proceeding
     if not camera_list or not camera_list[0].get('host'):
-        log(f"Configuration error: no cameras configured.", "System", "CRITICAL")
+        log(f"No cameras configured, check your configuration", "System", "CRITICAL")
         sys.exit(1)
     
-    log(f"Started ONVIF PTZ Helper. Cameras: {len(camera_list)}", "System", "INFO")
+    log(f"Started ONVIF PTZ Helper. Configured cameras: {len(camera_list)}", "System", "INFO")
     
     # Validate settings and launch the camera threads
     validate_and_start_cameras(camera_list, log_level)
         
-    # Keep the main process alive so daemon threads can continue to run
+    # Keep the main process alive so that daemon threads can continue to run
     try:
         while True:
             time.sleep(1)
