@@ -108,7 +108,7 @@ cameras:
 <b>Q:</b> Can I run this in a Docker container outside of Home Assistant?<br>
 <b>A:</b> There are handlers for passing the configuration during the Docker build process, but this currently only supports a single camera and is very, very untested. You could try mapping an options.json to /data/options.json. Why not Home Assistant?<br>
 
-<b>Q:</b> Can I submit working cameras to the Tested Camera Models list?<br>
+<b>Q:</b> Can I submit working cameras to the [Tested Camera Models](#tested-camera-models) list?<br>
 <b>A:</b> Sure, raise a PR or submit an issue. <br>
 
 <b>Q:</b> Why is my <i>\<insert thing></i> doing <i>\<insert problem></i> since I configured ONVIF PTZ Helper?<br>
