@@ -8,7 +8,7 @@ RUN apk add --no-cache python3 py3-pip coreutils
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN pip install --no-cache-dir zeep onvif-zeep requests
+RUN pip install --no-cache-dir zeep onvif-zeep requests tzdata
 
 COPY onvif_ptz_helper.py .
 COPY run.sh /
