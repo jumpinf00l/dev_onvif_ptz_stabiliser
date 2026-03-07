@@ -86,9 +86,6 @@ cameras:
     port: 80
     username: onvif
     password: ####
-    idle_polling_interval: 0.5
-    active_polling_interval: 0.2
-    active_polling_history: 3
   - camera_name: Front PTZ
     host: 10.0.0.124
     port: 8976
