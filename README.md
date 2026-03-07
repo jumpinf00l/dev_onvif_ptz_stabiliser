@@ -117,12 +117,12 @@ cameras:
 ## ⚖️ The Necessary Disclaimer:
 Please read this carefully before using this software.
 
-1. No Affiliation
+1. No Affiliation<br>
 ONVIF PTZ Helper is an independent open-source utility. Neither it nor its authors are affiliated with, authorised, maintained, sponsored, or endorsed by Frigate NVR™, Open Network Video Interface Forum (ONVIF), or any related camera manufacturer (e.g. Hikvision, Dahua, etc.). All product and company names are the registered trademarks of their original owners.
-2. "As-Is" Software
-This software is provided "as-is" and "as-available," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement.
-3. Assumption of Risk
-By using this software, you acknowledge that you should consider:
+2. "As-Is" Software<br>
+This software is provided "as-is" and "as-available," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement.<br>
+3. Assumption of Risk<br>
+By using this software, you acknowledge that you have considered and accepted (at a minimum):
    - Network Requirements: Frequent PTZ communication increases network traffic.
    - Security: You should take appropriate measures to ensure and maintain all aspects of security such as your network, camera management interfaces, and video streaming.
    - Liability: In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
