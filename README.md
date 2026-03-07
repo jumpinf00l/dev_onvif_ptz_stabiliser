@@ -1,7 +1,7 @@
 # ONVIF PTZ Helper
 A lightweight Home Assistant App (formerly Add-On) to help PTZ cameras which don't reliably report or update their 'PanTilt' and 'Zoom' status, such as continuing to report "Moving" when the camera is not actually moving and not reporting "Idle". It detects changes in the PTZ coordinates and automatically sends a 'Stop' command once the camera stabilises, which ensures that the camera updates the 'PanTilt' and 'Zoom' statuses to "Idle".
 
-This app was specifically developed to assist with adding [Frigate Autotracking](https://docs.frigate.video/configuration/autotracking/) to unsupported cameras such as the ones tested below, but it may help with other applications or services which rely on reliable 'PanTilt' and 'Zoom' statuses.
+This Home Assistant App was specifically developed to assist with adding [Frigate Autotracking](https://docs.frigate.video/configuration/autotracking/) to unsupported cameras [such as the ones tested below](#tested-camera-models), but it may help with other applications or services which rely on reliable 'PanTilt' and 'Zoom' statuses.
 
 ## 🚀 Features
 - <b>Lightweight:</b> Consumes bugger all system resources on the Home Assistant host.
@@ -26,7 +26,7 @@ ONVIF PTZ Helper uses the Python ONVIF Zeep library to interface with the camera
 [Open Network Video Interface Forum (ONVIF)](https://onvif.org)<br>
 ONVIF PTZ Helper uses ONVIF which is an industry standard set of interfaces (e.g. using SOAP and XML) which is administered by the Open Network Video Interface Forum.<br>
 
-## ✅ Tested Camera Models
+## ✅ Tested Camera Models<a name="tested-camera-models"></a>
 The below camera makes and models have been tested with Frigate Autotracking.
 | Brand | Model | Working Status | idle_polling_interval | active_polling_interval | active_polling_history | Notes |
 | ----- | ----- | -------------- | --------------------- | ----------------------- | ---------------------- | ----- |
