@@ -29,5 +29,3 @@ schema:
       idle_polling_interval: float(0,)?
       active_polling_interval: float(0,)?
       active_polling_history: int(2,)?
-
-
