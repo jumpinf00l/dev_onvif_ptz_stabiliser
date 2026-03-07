@@ -13,6 +13,7 @@ init: false
 startup: services
 boot: auto
 backup: cold
+map_timezone: true
 options:
   log_level: "INFO"
   cameras: []
@@ -29,6 +30,7 @@ schema:
       idle_polling_interval: float(0,)?
       active_polling_interval: float(0,)?
       active_polling_history: int(2,)?
+
 
 
 
