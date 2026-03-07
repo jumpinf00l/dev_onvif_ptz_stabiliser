@@ -1,7 +1,7 @@
 configuration:
   log_level:
     name: "Log level"
-    description: "Verbosity to use in logging. INFO is recommended, DEBUG will consume system resources and should only be used for debugging (Default: INFO)."
+    description: "Verbosity to use in logging. INFO is recommended, DEBUG will consume system resources and should only be used temporarily for debugging (Default: INFO)."
   cameras:
     name: "Cameras"
     description: "List of ONVIF cameras to monitor."
@@ -15,15 +15,15 @@ configuration:
       port:
         name: "Port"
         description: "The ONVIF interface port number of the camera."
+      ignore_ssl:
+        name: "Ignore SSL"
+        description: "Ignore SSL certificate validation errors (Default: False)"
       username:
         name: "Username"
         description: "The username to log into the ONVIF interface of the camera."
       password:
         name: "Password"
         description: "The password to log into the ONVIF interface of the camera."
-      ignore_ssl:
-        name: "Ignore SSL"
-        description: "Ignore SSL certificate validation errors (Default: False)"
       reconnect_time:
         name: "Reconnect Time (seconds)"
         description: "Seconds to wait after a disconnection before attempting to reconnect (Default: 5, Minimum: 0)."
