@@ -14,7 +14,7 @@ This Home Assistant App was specifically developed to assist with adding [Frigat
 ## 💡 Inspired By / Attribution:
 ONVIF PTZ Helper was developed with the following attributions in mind:<br>
 <br>
-[Frigate NVR™ - Realtime Object Detection for IP Cameras](https://github.com/blakeblackshear/frigate){:target="_blank"}<br>
+[Frigate NVR™ - Realtime Object Detection for IP Cameras](https://github.com/blakeblackshear/frigate)<br>
 ONVIF PTZ Helper seeks to extend the support of products like Frigate to allow Autotracking to be configured for unsupported PTZ cameras.<br>
 <br>
 [Zeep: Python SOAP client](https://github.com/mvantellingen/python-zeep)<br>
