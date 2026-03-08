@@ -3,7 +3,7 @@ configuration:
     name: "Log level"
     description: "Verbosity to use in logging. INFO is recommended, DEBUG will consume system resources and should only be used temporarily for debugging (Default: INFO)."
   cameras:
-    name: "ONVIF Camera List"
+    name: "Configure Cameras"
     description: "List of ONVIF cameras to monitor."
     items:
       camera_name:
