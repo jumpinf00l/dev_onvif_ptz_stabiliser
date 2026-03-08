@@ -1,0 +1,1 @@
+- Added note regarding front-end strings not being translated
