@@ -5,7 +5,7 @@ configuration:
   cameras:
     name: "ONVIF Camera List"
     description: "List of ONVIF cameras to monitor."
-    fields:
+    items:
       camera_name:
         name: "Camera Name"
         description: "A friendly camera name for configuration and logging."
