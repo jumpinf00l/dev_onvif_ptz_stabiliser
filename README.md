@@ -14,8 +14,8 @@ This Home Assistant App was specifically developed to assist with adding [Frigat
 ## 💡 Inspired By / Attribution:
 ONVIF PTZ Helper was developed with the following attributions in mind:<br>
 <br>
-[Frigate NVR™ - Realtime Object Detection for IP Cameras](https://github.com/blakeblackshear/frigate)<br>
-ONVIF PTZ Helper seeks to extend the support of Frigate to allow Autotracking to be configured for unsupported PTZ cameras.<br>
+[Frigate NVR™ - Realtime Object Detection for IP Cameras](https://github.com/blakeblackshear/frigate){:target="_blank"}<br>
+ONVIF PTZ Helper seeks to extend the support of products like Frigate to allow Autotracking to be configured for unsupported PTZ cameras.<br>
 <br>
 [Zeep: Python SOAP client](https://github.com/mvantellingen/python-zeep)<br>
 ONVIF PTZ Helper uses the Python Zeep library for SOAP connections to the camera.<br>
@@ -57,6 +57,7 @@ The following notes are specific to Frigate Autotracking, but may apply to other
 - Retry Autotracking calibration with your desired configuration 2-3 times before changing your configuration since it may fail the first time but succeed following times with no changes.
 > [!CAUTION]
 > <b>The Frigate web service will not run during Autotracking calibration (see [Frigate Camera Autotracking > Calibration](https://docs.frigate.video/configuration/autotracking/#calibration))</b>.<br>This is normal and prevents other Frigate services from interrupting the Autotracking calibration. This is not a result of ONVIF PTZ Helper, and the web service will start once calibration is complete which may take several minutes. If there are no Autotracking progress updates in the Frigate App/container logs console after the initial update, check your ONVIF PTZ Helper configuration and log output to confirm that it is able to connect to the camera and poll its 'PanTilt' and 'Zoom' correctly (try 'DEBUG' logging).
+- ONVIF PTZ Helper does not change the support status of cameras with Frigate; cameras which are unsupported for Frigate Autotracking remain unsupported. Working ≠ supported.
 
 ## ⚙️ Configuration<a name="configuration"></a>
 ### Configuration options
