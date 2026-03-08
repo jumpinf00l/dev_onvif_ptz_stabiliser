@@ -1,3 +1,5 @@
+title: ONVIF PTZ Helper
+description: Helps some ONVIF cameras that don't update their PTZ movement to idle.
 configuration:
   log_level:
     name: "Log level"
