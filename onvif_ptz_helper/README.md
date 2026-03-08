@@ -61,6 +61,9 @@ The following notes are specific to Frigate Autotracking, but may apply to other
 
 ## ⚙️ Configuration<a name="configuration"></a>
 ### Configuration options
+> [!NOTE]
+> There is currently a bug in Home Assistant since around 2026.2.0 which prevents the configuration option translations from appearing in the front-end. Please see the YAML options in the table below for translated names and descriptions of the options.
+
 The ONVIF PTZ Helper Home Assistant App accepts the below configuration:
 
 | Option | Sub-option | YAML option | Description | Type | Required | Example | Default |
